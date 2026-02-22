@@ -588,7 +588,7 @@
     <div class="batch-warn" id="batchWarn"></div>
     <div class="launch-info" id="launchInfo">
       <button class="launch-info-dismiss" onclick="dismissLaunchInfo()" title="Dismiss">&#10005;</button>
-      <strong>Session mode.</strong> Each session covers a small batch of posts. Copy the prompt, paste it into the Claude sidebar — Claude posts the batch and tells you when to come back for the next one. Laptop needs to stay awake during each session, but can sleep between them.
+      <strong>Session mode.</strong> Each session is one batch of posts — copy the prompt, paste it into the Claude sidebar, and Claude handles that batch. When it's done it'll tell you when to come back. Laptop needs to stay awake during each session, but can sleep between them.
     </div>
     <div id="batchEstimate" style="display:none;margin-bottom:10px;"></div>
     <button class="btn-primary" id="launchBtn" onclick="launch()" disabled>
@@ -635,26 +635,26 @@
 
       <div class="settings-section-label">Posting Pace</div>
       <p style="font-size:13px;color:var(--ink-light);line-height:1.6;margin-bottom:14px;">
-        Controls how fast Claude posts. When in doubt, use Normal.
+        Controls how many posts Claude does per session and how long it waits between them. Normal is calibrated for your daily volume — start there.
       </p>
       <div class="pace-cards">
         <div class="pace-card" id="paceCard_careful" onclick="selectPace('careful')">
           <div class="pace-card-emoji">🐢</div>
           <div class="pace-card-label">Careful</div>
-          <div class="pace-card-desc">New accounts or after any warnings</div>
-          <span class="pace-card-stats">4 posts · 30 min break</span>
+          <div class="pace-card-desc">After warnings or posting restrictions</div>
+          <span class="pace-card-stats">8 posts · 40 min break</span>
         </div>
         <div class="pace-card" id="paceCard_normal" onclick="selectPace('normal')">
           <div class="pace-card-emoji">👍</div>
           <div class="pace-card-label">Normal</div>
-          <div class="pace-card-desc">Recommended for most accounts</div>
-          <span class="pace-card-stats">6 posts · 20 min break</span>
+          <div class="pace-card-desc">Your daily pace — 120 posts comfortably</div>
+          <span class="pace-card-stats">16 posts · 25 min break</span>
         </div>
         <div class="pace-card" id="paceCard_active" onclick="selectPace('active')">
           <div class="pace-card-emoji">⚡</div>
           <div class="pace-card-label">Active</div>
-          <div class="pace-card-desc">Established accounts only</div>
-          <span class="pace-card-stats">8 posts · 15 min break</span>
+          <div class="pace-card-desc">When you need to finish faster</div>
+          <span class="pace-card-stats">24 posts · 15 min break</span>
         </div>
       </div>
       <p class="pacing-hint" id="paceHint"></p>
@@ -672,9 +672,9 @@ let queue = [];
 let combos = [];
 let blurbs = [];
 const PACE_PRESETS = {
-  careful: { minDelay:60, maxDelay:120, switchDelay:90, sessionSize:4,  sessionBreak:30, spreadHours:12, dailyMax:15 },
-  normal:  { minDelay:45, maxDelay:90,  switchDelay:60, sessionSize:6,  sessionBreak:20, spreadHours:10, dailyMax:25 },
-  active:  { minDelay:30, maxDelay:60,  switchDelay:45, sessionSize:8,  sessionBreak:15, spreadHours:8,  dailyMax:40 },
+  careful: { minDelay:45, maxDelay:90,  switchDelay:75, sessionSize:8,  sessionBreak:40, spreadHours:12, dailyMax:60  },
+  normal:  { minDelay:10, maxDelay:25,  switchDelay:45, sessionSize:16, sessionBreak:25, spreadHours:10, dailyMax:120 },
+  active:  { minDelay:18, maxDelay:35,  switchDelay:30, sessionSize:24, sessionBreak:15, spreadHours:8,  dailyMax:160 },
 };
 let pacing = { ...PACE_PRESETS.normal, preset:'normal' };
 let warmup = { enabled:false, currentLimit:20, targetLimit:40, weeklyIncrement:5, weekStart:null };
@@ -911,9 +911,9 @@ function renderBlurbs(){
 
 // ── Pacing ──
 const PACE_LABELS = {
-  careful: { daily:'Up to 15 posts/day across the day' },
-  normal:  { daily:'Up to 25 posts/day across the day' },
-  active:  { daily:'Up to 40 posts/day across the day' },
+  careful: { daily:'~60 posts/day — use after any warnings or posting restrictions' },
+  normal:  { daily:'~120 posts/day across ~10 hours — your daily pace' },
+  active:  { daily:'~120 posts/day in ~8 hours — when you need to finish faster' },
 };
 
 function renderPaceCards(){
