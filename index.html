@@ -768,7 +768,9 @@ function buildPrompt(){
     '- End with a call to action (e.g. "Link below!", "Grab it before it sells out!", "Check the link!")',
     '- Do NOT include the product URL',
     aff ? '- Write only the creative caption text -- do NOT add any disclosure or affiliate language, the required footer is provided separately below and must be appended verbatim' : null,
-    '- Tailor tone slightly to each account name if names suggest different audiences',
+    '- Vary the structure of each opening: use a question for one, a bold statement for another, an exclamation for another, and a personal observation for the last',
+    '- Vary emoji usage: some captions can have 1-2 emojis, others none',
+    '- Vary the CTA phrasing: each account should end differently (e.g. "Link in the comments!", "Check the link below!", "Grab it here!", "You need this — link below!")',
   ].filter(Boolean).join('\n');
 
   const footerNote = footer
@@ -790,6 +792,7 @@ footerNote+'\n\n'+
 '------------------------------------------------------------\n\n'+
 'PHASE 2 -- POST TO ALL 4 ACCOUNTS\n'+
 '(Only start after I approve the captions above)\n\n'+
+'First, navigate to https://www.facebook.com and make sure you are logged in.\n'+
 'Post to each account one at a time using the approved captions.\n\n'+
 'LINK TO INCLUDE ON EVERY POST:\n'+link+'\n\n'+
 'MY 4 ACCOUNTS (in this order):\n'+accountList+'\n\n'+
@@ -798,7 +801,7 @@ footerNote+'\n\n'+
 '2. Scroll to the top of the page.\n'+
 '3. Click "What\'s on your mind?" to open the composer. If a dialog opens, click inside the text area.\n'+
 '4. Type that account\'s approved caption exactly, including the footer at the end.'+(footer ? ' The footer must be typed word-for-word as approved -- do not rephrase, shorten, or change it.\n' : '\n')+
-'5. Press Enter once, then paste the LINK on a new line.\n'+
+'5. Click at the end of the caption text, press Shift+Enter to create a new line, then paste the LINK.\n'+
 '6. Wait up to 15 seconds for a link preview to load (leave it if it appears).\n'+
 '7. Click the blue Post button.\n'+
 '8. Wait for the page to confirm the post went through.\n'+
