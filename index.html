@@ -531,7 +531,25 @@ function removeCombo(id){
 
 function updateCombo(id, field, value){
   const c = combos.find(c=>c.id===id);
-  if(c){ c[field]=value; saveCombos(); }
+  if(!c) return;
+  // Sanitize groupUrl — must be https://
+  if(field==='groupUrl' && value.trim()){
+    const v = value.trim().toLowerCase();
+    if(v.startsWith('javascript:') || v.startsWith('data:') || v.startsWith('vbscript:')){
+      toast('⚠️ Invalid URL — must start with https://');
+      // reset the field visually
+      const row = document.getElementById('crow_'+id);
+      if(row){ const inp = row.querySelectorAll('input')[2]; if(inp){ inp.value = c.groupUrl||''; } }
+      return;
+    }
+    if(value.trim() && !/^https?:\/\//i.test(value.trim())){
+      // auto-prepend https://
+      value = 'https://' + value.trim();
+      const row = document.getElementById('crow_'+id);
+      if(row){ const inp = row.querySelectorAll('input')[2]; if(inp){ inp.value = value; } }
+    }
+  }
+  c[field]=value; saveCombos();
 }
 
 function renderSettingsCombos(){
@@ -575,13 +593,24 @@ function renderSettingsCombos(){
 // ── Queue ──
 function updateAddBtn(){
   const v = document.getElementById('urlInput').value.trim();
-  document.getElementById('addBtn').disabled = !(/^(https?:\/\/|www\.)/i.test(v) && v.length>10);
+  const valid = /^(https?:\/\/|www\.)/i.test(v) && v.length>10;
+  document.getElementById('addBtn').disabled = !valid;
+}
+
+function shakeInput(){
+  const inp = document.getElementById('urlInput');
+  inp.style.transition='none';
+  inp.style.borderColor='var(--red)';
+  inp.style.boxShadow='0 0 0 3.5px rgba(196,48,48,.15)';
+  setTimeout(()=>{ inp.style.borderColor=''; inp.style.boxShadow=''; inp.style.transition=''; }, 700);
 }
 
 function addToQueue(){
   const inp = document.getElementById('urlInput');
   const url = inp.value.trim();
-  if(!url) return;
+  if(!url){ shakeInput(); toast('Paste an Amazon URL first'); return; }
+  if(!/^(https?:\/\/|www\.)/i.test(url)){ shakeInput(); toast('⚠️ Needs a full URL (https://...)'); return; }
+  if(!isAmazonUrl(url)){ shakeInput(); toast('⚠️ Only Amazon product URLs are supported'); return; }
   addUrlsToQueue([url]);
   inp.value='';
   updateAddBtn();
@@ -594,12 +623,23 @@ function removeFromQueue(id){
   updateLaunchBtn();
 }
 
+function isAmazonUrl(url){
+  try {
+    const host = new URL(url.startsWith('http') ? url : 'https://'+url).hostname.replace(/^www\./,'');
+    return /^(amazon\.(com|co\.uk|ca|de|fr|it|es|co\.jp|com\.au|com\.br|nl|pl|se|in|com\.mx)|amzn\.(to|com))$/.test(host);
+  } catch(e){ return false; }
+}
+
 function addUrlsToQueue(urls){
-  let added=0, dupes=0;
+  let added=0, dupes=0, nonAmazon=0;
   urls.forEach(url=>{
     url = url.trim();
     if(!url || !/^(https?:\/\/|www\.)/i.test(url) || url.length<10) return;
-    if(queue.some(p=>p.url===url)){ dupes++; return; }
+    if(!isAmazonUrl(url)){ nonAmazon++; return; }
+    // ASIN-level dedup
+    const asin = extractAsin(url);
+    if(asin && queue.some(p=>extractAsin(p.url)===asin)){ dupes++; return; }
+    if(!asin && queue.some(p=>p.url===url)){ dupes++; return; }
     const statuses={};
     combos.forEach(c=>{ statuses[c.id]='pending'; });
     queue.push({ id:'p'+Date.now()+Math.random().toString(36).slice(2,6), url, addedAt:Date.now(), statuses, disabledCombos:{} });
@@ -608,7 +648,8 @@ function addUrlsToQueue(urls){
   if(added>0){ saveQueue(); renderQueue(); updateLaunchBtn(); }
   if(added>1) toast(`Added ${added} product${added!==1?'s':''}`+(dupes?` (${dupes} duplicate${dupes!==1?'s':''} skipped)`:''));
   else if(added===1) toast('Added to queue'+(dupes?' (1 duplicate skipped)':''));
-  else if(dupes>0) toast(`Already in queue`);
+  else if(dupes>0) toast('Already in queue — duplicate skipped');
+  else if(nonAmazon>0) toast('⚠️ Only Amazon product URLs are supported');
 }
 
 // Paste handler — intercepts multi-URL pastes
@@ -784,7 +825,8 @@ function dragDrop(e, idx){
 }
 
 function checkWarning(){
-  const missing = combos.length===0;
+  const hasValid = combos.some(c=>c.accountName.trim() && c.groupUrl.trim() && (c.template||'').trim());
+  const missing = !hasValid;
   document.getElementById('noCombosWarn').className='no-combos-warn'+(missing?' show':'');
   document.getElementById('settingsDot').className='settings-dot'+(missing?' show':'');
 }
@@ -930,8 +972,22 @@ async function launch(){
     return combos.some(c=>!dis[c.id] && (!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
   }));
   if(!prompt) { toast('Nothing left to post!'); return; }
+  const btn = document.getElementById('launchBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Copying...';
   const ok = await doCopy(prompt);
-  if(ok) toast('Prompt copied — paste into Claude sidebar!');
+  if(ok){
+    btn.innerHTML = '✓ Copied!';
+    btn.style.background = 'linear-gradient(160deg, #2e6247 0%, #1e3d2c 60%)';
+    toast('Prompt copied — paste into Claude sidebar!');
+    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; btn.disabled=false; updateLaunchBtn(); }, 2500);
+  } else {
+    btn.innerHTML = orig;
+    btn.style.background = '';
+    btn.disabled = false;
+    updateLaunchBtn();
+  }
 }
 
 async function launchSingle(productId){
@@ -992,6 +1048,11 @@ document.addEventListener('click', ()=>{
 // ── Settings ──
 function openSettings(){ document.getElementById('settingsOverlay').className='settings-overlay open'; }
 function closeSettings(){
+  // warn if incomplete combos exist
+  const incomplete = combos.filter(c=>!c.accountName.trim() || !c.groupUrl.trim() || !(c.template||'').trim());
+  if(incomplete.length && combos.length > 0){
+    toast(`⚠️ ${incomplete.length} combo(s) incomplete — fill in all fields`);
+  }
   document.getElementById('settingsOverlay').className='settings-overlay';
   const validIds = new Set(combos.map(c=>c.id));
   queue.forEach(p=>{
@@ -1005,6 +1066,8 @@ function closeSettings(){
   renderQueue(); checkWarning(); updateLaunchBtn();
 }
 function overlayClick(e){ if(e.target===document.getElementById('settingsOverlay')) closeSettings(); }
+// ESC closes settings
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSettings(); });
 
 // ── Public API for Claude ──
 window.setProductName = function(productId, name){
