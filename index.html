@@ -84,7 +84,7 @@
   .card {
     background:white; border-radius:20px; border:1px solid var(--border);
     box-shadow:0 2px 16px var(--shadow), 0 1px 0 rgba(255,255,255,.9) inset;
-    margin-bottom:14px; overflow:hidden; position:relative;
+    margin-bottom:12px; overflow:hidden; position:relative;
   }
   .card::before {
     content:''; position:absolute; top:0; left:0; right:0; height:1px;
@@ -127,8 +127,8 @@
   .queue-empty-icon { font-size:36px; margin-bottom:12px; opacity:.5; }
 
   .queue-item {
-    display:flex; align-items:flex-start; gap:14px;
-    padding:14px 0; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:10px;
+    padding:12px 0; border-bottom:1px solid var(--border);
     animation:fadeUp .25s cubic-bezier(.22,1,.36,1) both;
     transition:opacity .15s;
   }
@@ -139,26 +139,47 @@
   @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
   .qi-drag {
-    color:var(--border); font-size:16px; cursor:grab; flex-shrink:0;
-    margin-top:5px; user-select:none; transition:color .15s; line-height:1;
+    color:var(--border); font-size:15px; cursor:grab; flex-shrink:0;
+    user-select:none; transition:color .15s; line-height:1;
   }
   .qi-drag:hover { color:var(--ink-light); }
   .qi-drag:active { cursor:grabbing; }
 
-  .qi-num {
-    width:28px; height:28px; border-radius:50%; background:var(--cream-dark);
-    border:1.5px solid var(--border); flex-shrink:0;
-    font-size:12px; font-weight:700; color:var(--ink-light);
-    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  /* Placeholder state: compact circle like the old num, expands to 44px when image loads */
+  .qi-thumb {
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    background:var(--cream-dark); border:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+    transition:width .2s ease, height .2s ease, border-radius .2s ease;
   }
+  .qi-thumb.has-img {
+    width:44px; height:44px; border-radius:10px;
+  }
+  .qi-thumb img {
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .qi-thumb-num {
+    position:absolute; inset:0;
+    font-size:11px; font-weight:700; color:var(--ink-light);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .qi-thumb.has-img .qi-thumb-num {
+    inset:auto; bottom:3px; right:4px;
+    background:rgba(28,16,8,.55); color:#fff; border-radius:4px;
+    font-size:9px; font-weight:700; padding:1px 4px;
+    backdrop-filter:blur(2px);
+  }
+  .queue-item.all-posted .qi-thumb { border-color:var(--sage); background:var(--sage-light); }
+  .queue-item.all-posted .qi-thumb-num { color:var(--sage-dark); }
+  .queue-item.all-posted .qi-thumb.has-img .qi-thumb-num { background:rgba(46,98,71,.7); color:#fff; }
   .qi-content { flex:1; min-width:0; }
-  .qi-url { font-size:13px; font-weight:500; color:var(--ink); word-break:break-word; overflow-wrap:anywhere; margin-bottom:8px; line-height:1.4; }
+  .qi-url { font-size:13px; font-weight:500; color:var(--ink); word-break:break-word; overflow-wrap:anywhere; margin-bottom:6px; line-height:1.4; }
   .qi-url a { color:var(--terra-dark); text-decoration:none; }
   .qi-url a:hover { text-decoration:underline; }
   .qi-statuses { display:flex; flex-wrap:wrap; gap:5px; }
 
   .queue-item.all-posted { opacity:.65; }
-  .queue-item.all-posted .qi-num { background:var(--sage-light); border-color:var(--sage); color:var(--sage-dark); }
 
   /* Batch dividers */
   .batch-divider {
@@ -215,12 +236,6 @@
   }
   .qi-retry:hover { color:var(--terra); background:var(--terra-light); }
 
-  /* Progress bar — lives inside queue card footer */
-  .progress-footer { padding:14px 20px 16px; border-top:1px solid var(--border); }
-  .progress-bar-track { height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
-  .progress-bar-fill { height:100%; background:var(--sage); border-radius:99px; transition:width .4s ease; }
-  .progress-bar-label { font-size:11px; color:var(--ink-light); margin-top:6px; font-weight:500; }
-
   /* Bottom action row */
   .action-row { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
   .btn-ghost {
@@ -234,26 +249,26 @@
   .toast-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
   .launch-info {
     background:var(--cream); border:1px solid var(--border);
-    border-radius:13px; padding:13px 16px; font-size:13px; color:var(--ink-mid);
-    line-height:1.6; margin-bottom:14px; display:none;
+    border-radius:13px; padding:12px 36px 12px 14px; font-size:13px; color:var(--ink-mid);
+    line-height:1.6; margin-bottom:10px; display:none;
     position:relative;
   }
   .launch-info.show { display:block; }
   .launch-info strong { color:var(--ink); }
   .launch-info-dismiss {
-    position:absolute; top:8px; right:8px;
+    position:absolute; top:7px; right:7px;
     width:22px; height:22px; border-radius:6px;
     background:none; border:none; cursor:pointer;
-    font-size:13px; color:var(--ink-light);
+    font-size:12px; color:var(--ink-light);
     display:flex; align-items:center; justify-content:center;
     transition:color .15s, background .15s; line-height:1;
   }
   .launch-info-dismiss:hover { color:var(--ink); background:var(--border); }
   .batch-estimate {
-    display:inline-flex; align-items:center; gap:6px;
+    display:inline-flex; align-items:center; gap:5px;
     background:var(--terra-light); border:1px solid rgba(179,97,45,.2);
-    border-radius:99px; padding:3px 10px; font-size:12px; font-weight:600;
-    color:var(--terra-dark); margin-top:8px;
+    border-radius:99px; padding:4px 11px; font-size:12px; font-weight:600;
+    color:var(--terra-dark);
   }
   /* Buttons */
   .btn-primary {
@@ -304,6 +319,7 @@
   .settings-header {
     display:flex; align-items:center; justify-content:space-between;
     padding:20px 24px; border-bottom:1px solid var(--border); background:white;
+    position:sticky; top:0; z-index:1;
   }
   .settings-title { font-family:'Fraunces',serif; font-size:22px; font-weight:600; letter-spacing:-.5px; }
   .settings-close {
@@ -367,11 +383,11 @@
   }
   .settings-save-btn:hover { background:#2e1a08; }
 
-  /* Progress bar — lives inside queue card footer */
-  .progress-footer { padding:14px 20px 16px; border-top:1px solid var(--border); }
+  /* Progress bar */
+  .progress-footer { padding:11px 20px 13px; border-top:1px solid var(--border); }
   .progress-bar-track { height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
   .progress-bar-fill { height:100%; background:var(--sage); border-radius:99px; transition:width .4s ease; }
-  .progress-bar-label { font-size:11px; color:var(--ink-light); margin-top:6px; font-weight:500; }
+  .progress-bar-label { font-size:11px; color:var(--ink-light); margin-top:5px; font-weight:500; }
   .toast-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
   .toast {
     background:linear-gradient(135deg, #2e1a0a, #1c1008); color:white;
@@ -574,12 +590,12 @@
       <button class="launch-info-dismiss" onclick="dismissLaunchInfo()" title="Dismiss">&#10005;</button>
       <strong>Session mode.</strong> Each session covers a small batch of posts. Copy the prompt, paste it into the Claude sidebar — Claude posts the batch and tells you when to come back for the next one. Laptop needs to stay awake during each session, but can sleep between them.
     </div>
-    <div id="batchEstimate" style="display:none;margin-bottom:14px;"></div>
+    <div id="batchEstimate" style="display:none;margin-bottom:10px;"></div>
     <button class="btn-primary" id="launchBtn" onclick="launch()" disabled>
       &#10022; Generate &amp; Copy Prompt
     </button>
     <div class="action-row">
-      <button class="btn-ghost" id="clearDoneBtn" onclick="clearDone()">Clear posted</button>
+      <button class="btn-ghost" id="clearDoneBtn" onclick="clearDone()">Clear finished</button>
       <button class="btn-ghost" id="clearAllBtn" onclick="clearAll()">Clear all</button>
     </div>
   </div>
@@ -737,7 +753,7 @@ function splitIntoBatches(){
   let comboCount = 0;
   queue.forEach(p => {
     const dis = p.disabledCombos || {};
-    const active = combos.filter(c => !dis[c.id]).length;
+    const active = combos.filter(c => !dis[c.id] && isPendingStatus(p.statuses[c.id])).length;
     if(comboCount > 0 && active > 0 && comboCount + active > pacing.sessionSize){
       batchNum++;
       comboCount = 0;
@@ -933,11 +949,6 @@ function renderWarmup(){
   set('warmupIncrement', warmup.weeklyIncrement);
 
   // Progress bar
-  const pct = warmup.targetLimit > warmup.currentLimit
-    ? Math.round((warmup.currentLimit - (warmup.currentLimit - warmup.weeklyIncrement)) / (warmup.targetLimit - (warmup.targetLimit - warmup.weeklyIncrement * Math.ceil((warmup.targetLimit - warmup.currentLimit) / warmup.weeklyIncrement + 1))) * 100)
-    : 100;
-  // Simpler: progress from startLimit to targetLimit
-  const startGuess = warmup.currentLimit; // approximate — we don't store original start
   const progressPct = warmup.targetLimit > 0
     ? Math.round(Math.min(100, (warmup.currentLimit / warmup.targetLimit) * 100))
     : 100;
@@ -1243,6 +1254,11 @@ function renderQueueItem(p, i){
   const enabledCombos = combos.filter(c=>!disabled[c.id]);
   const allPosted = enabledCombos.length>0 && enabledCombos.every(c=>p.statuses[c.id]==='posted');
   const hasFailed = enabledCombos.some(c=>p.statuses[c.id]==='failed');
+  const thumbHasImg = !!p.imageUrl;
+  const thumbNum = allPosted ? '✓' : String(i + 1);
+  const thumbInner = thumbHasImg
+    ? `<img src="${esc(p.imageUrl)}" alt="" loading="lazy" onerror="this.parentElement.classList.remove('has-img');this.remove()"><span class="qi-thumb-num">${thumbNum}</span>`
+    : `<span class="qi-thumb-num">${thumbNum}</span>`;
   return `<div class="queue-item no-anim${allPosted?' all-posted':''}" id="qi_${p.id}"
     draggable="true"
     ondragstart="dragStart(event,${i})"
@@ -1251,9 +1267,9 @@ function renderQueueItem(p, i){
     ondragend="dragEnd(event)"
     ondrop="dragDrop(event,${i})">
     <span class="qi-drag" title="Drag to reorder">⠿</span>
-    <div class="qi-num">${allPosted ? '✓' : i+1}</div>
+    <div class="qi-thumb${thumbHasImg?' has-img':''}">${thumbInner}</div>
     <div class="qi-content">
-      <div class="qi-url"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(displayLabel)}</a></div>
+      <div class="qi-url"><a href="${isAmazonUrl(p.url)?esc(p.url):'#'}" target="_blank" rel="noopener">${esc(displayLabel)}</a></div>
       <div class="qi-statuses">${chips.length?chips:'<span style="font-size:12px;color:var(--ink-light)">Set up combos in Settings</span>'}</div>
     </div>
     ${hasFailed ? `<button class="qi-retry" onclick="launchSingle('${p.id}',this)" title="Copy prompt to retry failed groups">↺</button>` : ''}
@@ -1349,7 +1365,10 @@ function clearDone(){
   queue = queue.filter(p=>{
     const dis = p.disabledCombos || {};
     const active = combos.filter(c=>!dis[c.id]);
-    return !(active.length===0 || active.every(c=>p.statuses[c.id]==='posted'));
+    // Keep if no active combos (user may have temporarily disabled all — don't discard)
+    if(active.length === 0) return true;
+    // Remove only if all active combos are finished (posted or failed)
+    return !active.every(c=>p.statuses[c.id]==='posted'||p.statuses[c.id]==='failed');
   });
   splitIntoBatches();
   renderQueue();
@@ -1378,15 +1397,14 @@ function showConfirm(message, onConfirm){
     </div>
   </div>`;
   document.body.appendChild(el);
-  const dismiss = ()=>el.remove();
-  const confirm = ()=>{ el.remove(); onConfirm(); };
+  const cleanup = () => document.removeEventListener('keydown', onKey, true);
+  const dismiss = ()=>{ el.remove(); cleanup(); };
+  const confirm = ()=>{ el.remove(); cleanup(); onConfirm(); };
   el.querySelector('#_confirmOk').onclick = confirm;
   el.querySelector('#_confirmCancel').onclick = dismiss;
   el.onclick = e=>{ if(e.target===el) dismiss(); };
-  // Use document-level keydown so ESC fires regardless of focus state
-  const onKey = e=>{ if(e.key==='Escape'){ e.stopPropagation(); dismiss(); document.removeEventListener('keydown',onKey,true); } };
+  const onKey = e=>{ if(e.key==='Escape'){ e.stopPropagation(); dismiss(); } };
   document.addEventListener('keydown', onKey, true);
-  // Auto-focus cancel so keyboard works naturally
   el.querySelector('#_confirmCancel').focus();
 }
 
@@ -1395,22 +1413,6 @@ function getPendingItems(){
     const dis = p.disabledCombos || {};
     return combos.some(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
   });
-}
-
-function getNextSessionItems(){
-  // Pack products until we'd exceed sessionSize combos.
-  // A single product with more combos than sessionSize is always included alone.
-  const pending = getPendingItems();
-  const items = [];
-  let comboCount = 0;
-  for(const p of pending){
-    const dis = p.disabledCombos || {};
-    const active = combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
-    if(comboCount + active > pacing.sessionSize && items.length > 0) break;
-    items.push(p);
-    comboCount += active;
-  }
-  return items;
 }
 
 function updateLaunchBtn(){
@@ -1480,15 +1482,15 @@ function dragDrop(e, idx){
   const moved = queue.splice(dragSrcIdx, 1)[0];
   queue.splice(idx, 0, moved);
   dragSrcIdx = null;
-  saveQueue();
+  splitIntoBatches(); // re-splits after saving
   renderQueue();
+  updateLaunchBtn();
 }
 
 function checkWarning(){
-  const hasValid = combos.some(c=>c.accountName.trim() && c.groupUrl.trim() && (c.template||'').trim());
-  const missing = !hasValid;
-  document.getElementById('noCombosWarn').className='no-combos-warn'+(missing?' show':'');
-  document.getElementById('settingsDot').className='settings-dot'+(missing?' show':'');
+  const invalid = getInvalidCombos().length > 0 || combos.length === 0;
+  document.getElementById('noCombosWarn').className='no-combos-warn'+(invalid?' show':'');
+  document.getElementById('settingsDot').className='settings-dot'+(invalid?' show':'');
 }
 
 // ── Build Prompt ──
@@ -1550,16 +1552,15 @@ For every Facebook post, write a fresh 4–6 word opening blurb on the first lin
 
         return `
       COMBO — Account: "${c.accountName.trim()}" → "${(c.groupName||c.groupUrl).trim()}" [comboId: ${c.id}]
-        a. Execute on dashboard tab: window.setWorking('${p.id}','${c.id}')
-        b. On facebook.com, confirm active account is "${c.accountName.trim()}" — switch if needed
+        a. On facebook.com, confirm active account is "${c.accountName.trim()}" — switch if needed
+        b. Execute on dashboard tab: window.setWorking('${p.id}','${c.id}')
         c. Navigate to: ${c.groupUrl.trim()}
         d. Wait for group page to fully load
         e. Click "Write something..." or "Create post" to open the composer
-        f. Click the "Photo/Video" or camera icon in the composer to add media
-        g. Drag the product image (from your product image tab) into the photo attachment area, OR use the file picker if drag-and-drop isn't available. If this is not the first combo using this image, try selecting a different image from the product's image carousel (alternate angle or lifestyle shot) to avoid identical image fingerprints across posts.
-        h. Click inside the text area. On the FIRST LINE, write the 4–6 word opening blurb — make it slightly different from the blurb used for any previous combo in this batch (same product, different phrasing). Press Enter twice. Then paste (Ctrl+V) the Chickadeasy caption for template "${tmpl}". Do NOT include the Amazon URL in the post body.
-        i. Click the blue Post button and wait for confirmation
-        j. On success: window.updateStatus('${p.id}','${c.id}','posted')
+        f. Click the "Photo/Video" button in the post composer toolbar to open the file attachment. Find the file input element and upload the product image screenshot you took in STEP A-f using the upload_image tool — do NOT drag from the Amazon image tab, as that leaks the Amazon CDN origin. If this is not the first combo for this product, go back to the Amazon product page, click a different image in the carousel, take a fresh screenshot of that image instead (a different angle or lifestyle shot creates a distinct file each time). If image upload fails after one retry, proceed without the image and note it.
+        g. Click inside the text area. On the FIRST LINE, write the 4–6 word opening blurb — make it slightly different from the blurb used for any previous combo in this batch (same product, different phrasing). Press Enter twice. Then paste (Ctrl+V) the Chickadeasy caption for template "${tmpl}". Do NOT include the Amazon URL in the post body.
+        h. Click the blue Post button and wait for confirmation
+        i. On success: window.updateStatus('${p.id}','${c.id}','posted')
            On failure: window.updateStatus('${p.id}','${c.id}','failed') — describe error, continue
 ${commentStep}
         ⏱ MANDATORY DELAY: After this combo is fully complete (post + comment submitted), wait a randomized ${pacing.minDelay}–${pacing.maxDelay} seconds before starting the next combo. Vary the exact wait — don't use the same number twice in a row.`;
@@ -1568,17 +1569,17 @@ ${commentStep}
       return `
   TEMPLATE GROUP ${ti+1}: "${tmpl}" → used by ${tCombos.length} combo(s)
 
-    STEP A — Grab product image:
+    STEP A — Load product page and capture image:
       a. Navigate to: ${p.url}
       b. Wait up to 20 seconds for the page to fully load (including the Chickadeasy SiteStripe bar)
-      c. While waiting, grab the product title: read the text of #productTitle element (or fall back to page <title> before the first colon). Then execute on the dashboard tab:
+      c. Grab the product title: read the text of #productTitle element (or fall back to page <title> before the first colon). Execute on the dashboard tab:
          window.setProductName('${p.id}', 'THE TITLE YOU JUST READ')
          Then switch back to the Amazon tab.
       d. Find the main product image: look for the element with id "landingImage" — get its src attribute (use the full-resolution URL, not a thumbnail). If not found, check #imgTagWrappingLink img or the first large image in #imageBlock.
-      e. Open that image URL in a new tab so it's ready to drag into the Facebook post composer.
-
-    STEP B — Write the opening blurb:
-      Before posting, compose a 4–6 word opening blurb for this product. It will go at the top of every post in this template group. Write it now and remember it — it should feel natural and personal.
+      e. Execute on the dashboard tab:
+         window.setProductImage('${p.id}', 'IMAGE_URL_YOU_FOUND')
+         This shows a thumbnail on the dashboard. Then switch back.
+      f. Open the image URL in a new tab. Wait for it to fully load, then take a screenshot of just the image. Keep this screenshot — you will upload it directly to Facebook rather than dragging from the tab. Uploading a screenshot removes the Amazon CDN origin trail from the image file.
 
     STEP C — Generate post caption with Chickadeasy (template: "${tmpl}"):
       a. On the Amazon tab, wait for the Chickadeasy SiteStripe bar to appear at the top of the page
@@ -1596,13 +1597,12 @@ PRODUCT ${i+1} [ID: ${p.id}]
 URL: ${p.url}
 ${templateBlocks}
 
-  After all combos for this product: execute window.markProductDone('${p.id}')
 ---`;
   }).join('\n');
 
-  // Build status snapshot across ALL queue items (not just items in this batch)
-  const isResume = queue.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
-  const statusSnapshot = queue.map((p,i)=>{
+  // Build status snapshot for this batch only (not entire queue)
+  const isResume = items.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
+  const statusSnapshot = items.map((p,i)=>{
     const dis = p.disabledCombos || {};
     const label = p.name || extractAsin(p.url) || `Product ${i+1}`;
     const comboSummary = combos.map(c=>{
@@ -1655,7 +1655,7 @@ ${blurbSection}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IMPORTANT: THE DASHBOARD TAB
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Keep the Mom's Post Helper tab open the entire time. After each post, you will execute JavaScript on that tab to update the dashboard. The tab URL contains "claude.ai" or is a local HTML file — identify it now before you begin.
+Keep the Mom's Post Helper tab open the entire time. After each post, you will execute JavaScript on that tab to update the dashboard. The tab URL is signal-scout.github.io/moms-post-helper/ — find it in your open tabs now before you begin.
 
 To update the dashboard, execute JavaScript like this on the Mom's Post Helper tab:
   window.updateStatus('PRODUCT_ID', 'COMBO_ID', 'posted')   ← after successful post
@@ -1723,9 +1723,9 @@ IF ANYTHING GOES WRONG
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - CAPTCHA / human verification → STOP immediately and notify the user
 - Unexpected popup or dialog → describe it before clicking anything
-- Chickadeasy SiteStripe doesn't appear → scroll to top of page, wait 20s, refresh once, try again
+- Chickadeasy SiteStripe doesn't appear → scroll to top of page, wait 20s, refresh once, try again. If it still doesn't appear after the refresh, call window.updateStatus(productId, comboId, 'failed') for every pending combo for this product and move to the next product.
 - Post composer won't open → refresh the group page once, try again
-- Product image can't be found or attached → skip the image for that combo, note it, continue
+- Product image can't be uploaded or attached → skip the image for that combo, note it, continue
 - Group not found or access denied → mark combo as failed, continue
 - Any other error → mark the specific combo as failed, continue with the next one
 
@@ -1734,31 +1734,32 @@ Say "Session complete ✓ Posted ${totalPosts} post${totalPosts!==1?'s':''} acro
 
 // ── Launch ──
 async function launch(){
+  const btn = document.getElementById('launchBtn');
+  if(btn.disabled) return; // guard against double-click during async
+  btn.disabled = true;
+
   const invalid = getInvalidCombos();
   if(invalid.length){
     toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
-    return;
+    updateLaunchBtn(); return;
   }
   const items = getCurrentBatchItems();
-  if(!items.length){ toast('Nothing left to post!'); return; }
+  if(!items.length){ toast('Nothing left to post!'); updateLaunchBtn(); return; }
   const prompt = buildPrompt(items);
-  if(!prompt){ toast('Nothing left to post!'); return; }
+  if(!prompt){ toast('Nothing left to post!'); updateLaunchBtn(); return; }
 
   const ok = await doCopy(prompt);
   if(ok){
-    const btn = document.getElementById('launchBtn');
-    const orig = btn.textContent;
-    btn.textContent = '✦ Copied!';
+    btn.innerHTML = '✦ Copied!';
     btn.style.background = 'linear-gradient(160deg, var(--sage-dark) 0%, #1e3d2c 60%)';
     toast('Prompt copied — paste into Claude sidebar!');
     setTimeout(()=>{
-      btn.textContent = orig;
       btn.style.background = '';
       updateLaunchBtn();
     }, 1500);
   } else {
-    // Fallback modal is already showing — toast so there's some button-area feedback too
     toast('📋 Auto-copy blocked — use the popup to copy manually');
+    updateLaunchBtn();
   }
 }
 
@@ -1823,12 +1824,15 @@ function showCopyFallback(text){
     <div class="copy-fallback-header"><span>Copy this prompt</span><button class="copy-fallback-close" onclick="this.closest('.copy-fallback-overlay').remove()">&#10005;</button></div>
     <div class="copy-fallback-body">
       <p>Browser blocked auto-copy. Select all below and copy manually (Ctrl+A → Ctrl+C):</p>
-      <textarea class="copy-fallback-ta" id="cfta" readonly>${text}</textarea>
+      <textarea class="copy-fallback-ta" id="cfta" readonly></textarea>
       <button class="copy-fallback-go" onclick="document.getElementById('cfta').select();document.execCommand('copy');this.closest('.copy-fallback-overlay').remove();toast('Copied!')">Select &amp; Copy</button>
     </div>
   </div>`;
   document.body.appendChild(el);
-  setTimeout(()=>{ const ta=document.getElementById('cfta'); if(ta){ta.focus();ta.select();} },100);
+  // Set value imperatively — never inject prompt text into innerHTML
+  const ta = el.querySelector('#cfta');
+  ta.value = text;
+  setTimeout(()=>{ ta.focus(); ta.select(); }, 100);
 }
 
 // ── Info popover ──
@@ -1844,16 +1848,20 @@ document.addEventListener('click', ()=>{
 // ── Settings ──
 function openSettings(){
   advanceWarmupIfNeeded();
+  renderSettingsCombos();
   renderBlurbs();
   renderPaceCards();
-  document.getElementById('settingsOverlay').className='settings-overlay open';
+  const overlay = document.getElementById('settingsOverlay');
+  overlay.scrollTop = 0;
+  overlay.className = 'settings-overlay open';
 }
 
 function forceCloseSettings(){
   // Always closes — used by ESC, X button, and click-outside
-  // Discard ghost combos (added but never filled in) — don't persist them
+  // Discard ghost combos: keep only those with at least one required field filled
+  // Required: accountName, groupUrl, template — groupName is optional
   combos = combos.filter(c=>
-    c.accountName.trim() || c.groupName.trim() || c.groupUrl.trim() || (c.template||'').trim()
+    c.accountName.trim() || c.groupUrl.trim() || (c.template||'').trim()
   );
   document.getElementById('settingsOverlay').className='settings-overlay';
   const validIds = new Set(combos.map(c=>c.id));
@@ -1897,9 +1905,9 @@ function closeSettings(){
     });
     const hasBadUrl = incomplete.some(c=>c.groupUrl.trim() && !isFacebookUrl(c.groupUrl));
     if(hasBadUrl){
-      toast('⚠️ Facebook Group URL must be a facebook.com URL');
+      toast('⚠️ Facebook Group URL must be a facebook.com URL — or click ✕ to discard');
     } else {
-      toast(`⚠️ ${incomplete.length} combo(s) have empty required fields (highlighted in red)`);
+      toast(`⚠️ ${incomplete.length} combo(s) have empty required fields (highlighted) — or click ✕ to discard`);
     }
     return; // Don't close — keep open so user can fix
   }
@@ -1918,6 +1926,16 @@ window.setProductName = function(productId, name){
   const p = queue.find(x=>x.id===productId);
   if(!p || !name) return;
   p.name = String(name).trim().slice(0, 80);
+  saveQueue();
+  renderQueue();
+};
+
+window.setProductImage = function(productId, imageUrl){
+  const p = queue.find(x=>x.id===productId);
+  if(!p || !imageUrl) return;
+  // Basic sanity check — must be http/https, not javascript: or data:
+  if(!/^https?:\/\//i.test(imageUrl)){ console.warn('setProductImage: invalid URL', imageUrl); return; }
+  p.imageUrl = imageUrl.trim();
   saveQueue();
   renderQueue();
 };
