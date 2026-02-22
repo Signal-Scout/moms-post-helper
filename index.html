@@ -417,7 +417,7 @@
     <div class="card-body">
       <div class="url-row">
         <input type="text" id="urlInput" placeholder="Paste an Amazon product URL to add to queue..." onkeydown="if(event.key==='Enter')addToQueue()" oninput="updateAddBtn()">
-        <button class="add-btn" id="addBtn" onclick="addToQueue()" disabled>Add</button>
+        <button class="add-btn" id="addBtn" onclick="addToQueue()">Add</button>
       </div>
     </div>
   </div>
@@ -532,24 +532,40 @@ function removeCombo(id){
 function updateCombo(id, field, value){
   const c = combos.find(c=>c.id===id);
   if(!c) return;
-  // Sanitize groupUrl — must be https://
-  if(field==='groupUrl' && value.trim()){
-    const v = value.trim().toLowerCase();
-    if(v.startsWith('javascript:') || v.startsWith('data:') || v.startsWith('vbscript:')){
-      toast('⚠️ Invalid URL — must start with https://');
-      // reset the field visually
-      const row = document.getElementById('crow_'+id);
-      if(row){ const inp = row.querySelectorAll('input')[2]; if(inp){ inp.value = c.groupUrl||''; } }
-      return;
-    }
-    if(value.trim() && !/^https?:\/\//i.test(value.trim())){
-      // auto-prepend https://
-      value = 'https://' + value.trim();
-      const row = document.getElementById('crow_'+id);
-      if(row){ const inp = row.querySelectorAll('input')[2]; if(inp){ inp.value = value; } }
-    }
-  }
   c[field]=value; saveCombos();
+}
+
+function sanitizeGroupUrl(id){
+  const c = combos.find(c=>c.id===id);
+  if(!c) return;
+  let value = c.groupUrl.trim();
+  if(!value) return;
+  // Block dangerous protocols
+  if(/^(javascript|data|vbscript):/i.test(value)){
+    toast('⚠️ Invalid URL — must be a Facebook group URL');
+    c.groupUrl = '';
+    const row = document.getElementById('crow_'+id);
+    if(row){ const inp = row.querySelectorAll('input')[2]; if(inp) inp.value=''; }
+    saveCombos(); return;
+  }
+  // Auto-prepend https:// only if no protocol present
+  if(!/^https?:\/\//i.test(value)){
+    value = 'https://' + value;
+  }
+  // Validate it looks like a Facebook URL
+  try{
+    const host = new URL(value).hostname.replace(/^www\./,'');
+    if(!/(facebook\.com|fb\.com)$/.test(host)){
+      toast('⚠️ Group URL should be a facebook.com URL');
+    }
+  }catch(e){
+    toast('⚠️ Invalid URL format');
+    return;
+  }
+  c.groupUrl = value;
+  saveCombos();
+  const row = document.getElementById('crow_'+id);
+  if(row){ const inp = row.querySelectorAll('input')[2]; if(inp) inp.value=value; }
 }
 
 function renderSettingsCombos(){
@@ -578,7 +594,8 @@ function renderSettingsCombos(){
       <div class="combo-field full">
         <label>Facebook Group URL</label>
         <input type="text" placeholder="https://facebook.com/groups/..." value="${esc(c.groupUrl)}"
-          oninput="updateCombo('${c.id}','groupUrl',this.value)">
+          oninput="updateCombo('${c.id}','groupUrl',this.value)"
+          onblur="sanitizeGroupUrl('${c.id}')">
       </div>
       <div class="combo-field full">
         <label>Chickadeasy Template Name</label>
@@ -594,7 +611,10 @@ function renderSettingsCombos(){
 function updateAddBtn(){
   const v = document.getElementById('urlInput').value.trim();
   const valid = /^(https?:\/\/|www\.)/i.test(v) && v.length>10;
-  document.getElementById('addBtn').disabled = !valid;
+  const btn = document.getElementById('addBtn');
+  // Never truly disable — keep clickable so addToQueue() can show validation feedback
+  btn.style.opacity = valid ? '' : '0.5';
+  btn.style.cursor = valid ? '' : 'default';
 }
 
 function shakeInput(){
@@ -624,8 +644,11 @@ function removeFromQueue(id){
 }
 
 function isAmazonUrl(url){
+  // Reject URLs with HTML characters in them (malformed/XSS attempts)
+  if(/[<>"']/.test(url)) return false;
   try {
-    const host = new URL(url.startsWith('http') ? url : 'https://'+url).hostname.replace(/^www\./,'');
+    const parsed = new URL(url.startsWith('http') ? url : 'https://'+url);
+    const host = parsed.hostname.replace(/^www\./,'');
     return /^(amazon\.(com|co\.uk|ca|de|fr|it|es|co\.jp|com\.au|com\.br|nl|pl|se|in|com\.mx)|amzn\.(to|com))$/.test(host);
   } catch(e){ return false; }
 }
@@ -765,9 +788,29 @@ function clearDone(){
 }
 
 function clearAll(){
-  if(!confirm('Clear all '+(queue.length)+' items from the queue?')) return;
-  queue=[];
-  saveQueue(); renderQueue(); updateLaunchBtn();
+  showConfirm(
+    `Clear all ${queue.length} item${queue.length!==1?'s':''} from the queue?`,
+    ()=>{ queue=[]; saveQueue(); renderQueue(); updateLaunchBtn(); }
+  );
+}
+
+function showConfirm(message, onConfirm){
+  const el = document.createElement('div');
+  el.className = 'copy-fallback-overlay';
+  el.style.zIndex='10000';
+  el.innerHTML=`<div class="copy-fallback-sheet" style="max-width:360px;">
+    <div class="copy-fallback-header"><span>Confirm</span></div>
+    <div class="copy-fallback-body">
+      <p style="margin-bottom:16px;">${esc(message)}</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn-secondary" onclick="this.closest('.copy-fallback-overlay').remove()">Cancel</button>
+        <button class="settings-save-btn" style="width:auto;padding:10px 20px;margin-top:0;font-size:14px;" id="_confirmOk">Clear</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  el.querySelector('#_confirmOk').onclick = ()=>{ el.remove(); onConfirm(); };
+  el.addEventListener('keydown', e=>{ if(e.key==='Escape') el.remove(); });
 }
 
 function updateLaunchBtn(){
@@ -974,19 +1017,22 @@ async function launch(){
   if(!prompt) { toast('Nothing left to post!'); return; }
   const btn = document.getElementById('launchBtn');
   const orig = btn.innerHTML;
+  const origBg = btn.style.background;
   btn.disabled = true;
-  btn.innerHTML = '⏳ Copying...';
+  btn.innerHTML = '⏳ Copying…';
+  // Small delay so browser paints the loading state before clipboard call
+  await new Promise(r=>setTimeout(r,40));
   const ok = await doCopy(prompt);
   if(ok){
     btn.innerHTML = '✓ Copied!';
     btn.style.background = 'linear-gradient(160deg, #2e6247 0%, #1e3d2c 60%)';
     toast('Prompt copied — paste into Claude sidebar!');
-    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; btn.disabled=false; updateLaunchBtn(); }, 2500);
+    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=origBg; btn.disabled=false; updateLaunchBtn(); }, 2500);
   } else {
-    btn.innerHTML = orig;
-    btn.style.background = '';
-    btn.disabled = false;
-    updateLaunchBtn();
+    // Fallback modal is already showing — give button feedback too
+    btn.innerHTML = '📋 See popup to copy';
+    btn.style.background = 'linear-gradient(160deg, #7a3d14 0%, #5a2c0e 60%)';
+    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=origBg; btn.disabled=false; updateLaunchBtn(); }, 4000);
   }
 }
 
@@ -1004,18 +1050,26 @@ async function launchSingle(productId){
 }
 
 async function doCopy(text){
-  if(navigator.clipboard && window.isSecureContext){
-    try{ await navigator.clipboard.writeText(text); return true; }catch(e){}
+  // Try modern clipboard API
+  if(navigator.clipboard){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(e){}
   }
+  // Try legacy execCommand
   try{
     const ta=document.createElement('textarea');
     ta.value=text;
     ta.style.cssText='position:fixed;top:10px;left:10px;width:1px;height:1px;opacity:0.01;';
-    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
     const ok=document.execCommand('copy');
     document.body.removeChild(ta);
     if(ok) return true;
   }catch(e){}
+  // Both failed — show manual fallback
   showCopyFallback(text);
   return false;
 }
@@ -1048,17 +1102,36 @@ document.addEventListener('click', ()=>{
 // ── Settings ──
 function openSettings(){ document.getElementById('settingsOverlay').className='settings-overlay open'; }
 function closeSettings(){
-  // warn if incomplete combos exist
+  // Highlight incomplete combo fields
   const incomplete = combos.filter(c=>!c.accountName.trim() || !c.groupUrl.trim() || !(c.template||'').trim());
   if(incomplete.length && combos.length > 0){
-    toast(`⚠️ ${incomplete.length} combo(s) incomplete — fill in all fields`);
+    incomplete.forEach(c=>{
+      const row = document.getElementById('crow_'+c.id);
+      if(!row) return;
+      const inputs = row.querySelectorAll('input');
+      // inputs: [accountName, groupName, groupUrl, template]
+      [
+        {idx:0, val:c.accountName},
+        {idx:2, val:c.groupUrl},
+        {idx:3, val:c.template||''},
+      ].forEach(({idx, val})=>{
+        if(!val.trim() && inputs[idx]){
+          inputs[idx].style.borderColor='var(--red)';
+          inputs[idx].style.boxShadow='0 0 0 3px rgba(196,48,48,.15)';
+          inputs[idx].addEventListener('input', function fix(){
+            this.style.borderColor=''; this.style.boxShadow='';
+            this.removeEventListener('input', fix);
+          });
+        }
+      });
+    });
+    toast(`⚠️ ${incomplete.length} combo(s) have empty required fields (highlighted in red)`);
+    return; // Don't close — keep open so user can fix
   }
   document.getElementById('settingsOverlay').className='settings-overlay';
   const validIds = new Set(combos.map(c=>c.id));
   queue.forEach(p=>{
-    // add new combos
     combos.forEach(c=>{ if(!(c.id in p.statuses)) p.statuses[c.id]='pending'; });
-    // prune deleted combos
     Object.keys(p.statuses).forEach(id=>{ if(!validIds.has(id)) delete p.statuses[id]; });
     if(p.disabledCombos) Object.keys(p.disabledCombos).forEach(id=>{ if(!validIds.has(id)) delete p.disabledCombos[id]; });
   });
