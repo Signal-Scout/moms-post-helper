@@ -232,25 +232,29 @@
   .btn-ghost.show { display:inline-flex; }
 
   .toast-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
-  /* Split button */
-  .btn-split {
-    width:100%; padding:13px 20px; margin-bottom:10px;
-    background:var(--cream); color:var(--ink-mid);
-    border:1.5px dashed var(--border); border-radius:13px;
-    font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
-    cursor:pointer; display:none; align-items:center; justify-content:center; gap:8px;
-    transition:border-color .15s, color .15s, background .15s;
-  }
-  .btn-split.show { display:flex; }
-  .btn-split:hover { border-color:var(--terra); color:var(--terra-dark); background:var(--terra-light); }
   .launch-info {
     background:var(--cream); border:1px solid var(--border);
     border-radius:13px; padding:13px 16px; font-size:13px; color:var(--ink-mid);
     line-height:1.6; margin-bottom:14px; display:none;
+    position:relative;
   }
   .launch-info.show { display:block; }
   .launch-info strong { color:var(--ink); }
-
+  .launch-info-dismiss {
+    position:absolute; top:8px; right:8px;
+    width:22px; height:22px; border-radius:6px;
+    background:none; border:none; cursor:pointer;
+    font-size:13px; color:var(--ink-light);
+    display:flex; align-items:center; justify-content:center;
+    transition:color .15s, background .15s; line-height:1;
+  }
+  .launch-info-dismiss:hover { color:var(--ink); background:var(--border); }
+  .batch-estimate {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--terra-light); border:1px solid rgba(179,97,45,.2);
+    border-radius:99px; padding:3px 10px; font-size:12px; font-weight:600;
+    color:var(--terra-dark); margin-top:8px;
+  }
   /* Buttons */
   .btn-primary {
     width:100%; padding:16px 24px;
@@ -567,9 +571,10 @@
   <div class="launch-section">
     <div class="batch-warn" id="batchWarn"></div>
     <div class="launch-info" id="launchInfo">
+      <button class="launch-info-dismiss" onclick="dismissLaunchInfo()" title="Dismiss">&#10005;</button>
       <strong>Session mode.</strong> Each session covers a small batch of posts. Copy the prompt, paste it into the Claude sidebar — Claude posts the batch and tells you when to come back for the next one. Laptop needs to stay awake during each session, but can sleep between them.
     </div>
-    <button class="btn-split" id="splitBtn" onclick="splitIntoBatches()">⊞ Split queue into batches</button>
+    <div id="batchEstimate" style="display:none;margin-bottom:14px;"></div>
     <button class="btn-primary" id="launchBtn" onclick="launch()" disabled>
       &#10022; Generate &amp; Copy Prompt
     </button>
@@ -722,19 +727,18 @@ function hasBatchAssignments(){
   return queue.length > 0 && queue.every(p => p.batch != null);
 }
 
-function clearBatchAssignments(){
-  queue.forEach(p => p.batch = null);
-  saveQueue();
-}
-
 function splitIntoBatches(){
-  if(queue.length === 0) return 0;
+  // Pure computation — always runs, no toast, no side effects beyond saving
+  if(queue.length === 0 || combos.length === 0){
+    queue.forEach(p => p.batch = 1); // no combos yet — assign all to batch 1
+    saveQueue(); return;
+  }
   let batchNum = 1;
   let comboCount = 0;
   queue.forEach(p => {
     const dis = p.disabledCombos || {};
     const active = combos.filter(c => !dis[c.id]).length;
-    if(comboCount > 0 && comboCount + active > pacing.sessionSize){
+    if(comboCount > 0 && active > 0 && comboCount + active > pacing.sessionSize){
       batchNum++;
       comboCount = 0;
     }
@@ -742,12 +746,6 @@ function splitIntoBatches(){
     comboCount += active;
   });
   saveQueue();
-  renderQueue();
-  updateSplitBtn();
-  updateLaunchBtn();
-  updateBatchWarn();
-  toast(`Queue split into ${batchNum} batch${batchNum!==1?'es':''}`);
-  return batchNum;
 }
 
 function getTotalBatches(){
@@ -776,11 +774,45 @@ function getCurrentBatchItems(){
   return queue.filter(p => p.batch === bn);
 }
 
-function updateSplitBtn(){
-  const btn = document.getElementById('splitBtn');
-  if(!btn) return;
-  const show = queue.length > 0 && !hasBatchAssignments();
-  btn.className = 'btn-split' + (show ? ' show' : '');
+function getBatchEstimate(){
+  // Returns { totalBatches, totalPosts, sessionGapMin, totalMinutes } for all pending work
+  if(queue.length === 0 || combos.length === 0) return null;
+  const totalBatches = getTotalBatches() || 1;
+  const totalPosts = queue.reduce((s,p)=>{
+    const dis = p.disabledCombos || {};
+    return s + combos.filter(c=>!dis[c.id] && isPendingStatus(p.statuses[c.id])).length;
+  }, 0);
+  if(totalPosts === 0) return null;
+  const avgPostSec = (pacing.minDelay + pacing.maxDelay) / 2;
+  const postingMin = Math.round(totalPosts * avgPostSec / 60);
+  const sessionGapMin = totalBatches > 1
+    ? Math.max(pacing.sessionBreak, Math.floor((pacing.spreadHours * 60) / totalBatches))
+    : 0;
+  const totalMinutes = postingMin + (totalBatches - 1) * sessionGapMin;
+  return { totalBatches, totalPosts, sessionGapMin, totalMinutes };
+}
+
+function fmtDuration(minutes){
+  if(minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h} hr ${m} min` : `${h} hr`;
+}
+
+function renderBatchEstimate(){
+  const el = document.getElementById('batchEstimate');
+  if(!el) return;
+  const est = getBatchEstimate();
+  if(!est){ el.style.display='none'; return; }
+  el.style.display = 'block';
+  const currentBatch = getCurrentBatch();
+  const remaining = currentBatch != null ? (est.totalBatches - currentBatch + 1) : 0;
+  const gapNote = est.sessionGapMin > 0 ? ` · ~${est.sessionGapMin} min between batches` : '';
+  if(remaining > 0 && remaining < est.totalBatches){
+    el.innerHTML = `<span class="batch-estimate">📦 ${remaining} batch${remaining!==1?'es':''} left · ~${fmtDuration(est.totalMinutes * remaining / est.totalBatches)}${gapNote}</span>`;
+  } else {
+    el.innerHTML = `<span class="batch-estimate">📦 ${est.totalBatches} batch${est.totalBatches!==1?'es':''} · ~${fmtDuration(est.totalMinutes)} total${gapNote}</span>`;
+  }
 }
 
 function advanceWarmupIfNeeded(){
@@ -811,8 +843,8 @@ function init(){
   renderSettingsCombos();
   renderBlurbs();
   renderPaceCards();
+  splitIntoBatches();
   renderQueue();
-  updateSplitBtn();
   checkWarning();
   updateAddBtn();
   updateLaunchBtn();
@@ -881,8 +913,7 @@ function selectPace(name){
   if(!PACE_PRESETS[name]) return;
   pacing = { ...PACE_PRESETS[name], preset:name };
   savePacing();
-  queue.forEach(p=>p.batch=null); // batch sizes depend on sessionSize
-  saveQueue();
+  splitIntoBatches();
   renderPaceCards();
   renderQueue();
   updateBatchWarn();
@@ -1140,8 +1171,7 @@ function addToQueue(){
 
 function removeFromQueue(id){
   queue = queue.filter(p=>p.id!==id);
-  queue.forEach(p=>p.batch=null); // batches are now potentially wrong size
-  saveQueue();
+  splitIntoBatches();
   renderQueue();
   updateLaunchBtn();
   updateBatchWarn();
@@ -1173,7 +1203,7 @@ function addUrlsToQueue(urls){
     queue.push({ id:'p'+Date.now()+Math.random().toString(36).slice(2,6), url, addedAt:Date.now(), statuses, disabledCombos:{} });
     added++;
   });
-  if(added>0){ queue.forEach(p=>p.batch=null); saveQueue(); renderQueue(); updateLaunchBtn(); updateBatchWarn(); }
+  if(added>0){ splitIntoBatches(); renderQueue(); updateLaunchBtn(); updateBatchWarn(); }
   if(added>1) toast(`Added ${added} product${added!==1?'s':''}`+(dupes?` (${dupes} duplicate${dupes!==1?'s':''} skipped)`:''));
   else if(added===1) toast('Added to queue'+(dupes?' (1 duplicate skipped)':''));
   else if(dupes>0) toast('Already in queue — duplicate skipped');
@@ -1231,11 +1261,17 @@ function renderQueueItem(p, i){
   </div>`;
 }
 
+function dismissLaunchInfo(){
+  ls('mph2_launchInfoDismissed', '1');
+  document.getElementById('launchInfo').className = 'launch-info';
+}
+
 function renderQueue(){
   const body = document.getElementById('queueBody');
   const countEl = document.getElementById('queueCount');
   const progressFooter = document.getElementById('progressFooter');
   const launchInfo = document.getElementById('launchInfo');
+  const dismissed = ls('mph2_launchInfoDismissed') === '1';
 
   if(queue.length===0){
     body.innerHTML = `<div class="queue-empty"><div class="queue-empty-icon">🍃</div>Add some Amazon URLs above to get started</div>`;
@@ -1244,39 +1280,36 @@ function renderQueue(){
     launchInfo.className='launch-info';
     document.getElementById('clearDoneBtn').className='btn-ghost';
     document.getElementById('clearAllBtn').className='btn-ghost';
-    updateSplitBtn();
+    renderBatchEstimate();
     checkAllDone();
     return;
   }
   countEl.textContent = queue.length+' product'+(queue.length!==1?'s':'');
-  launchInfo.className='launch-info show';
-  updateSplitBtn();
+  launchInfo.className = 'launch-info' + (dismissed ? '' : ' show');
+  renderBatchEstimate();
 
-  if(hasBatchAssignments()){
-    const currentBatch = getCurrentBatch();
-    const batches = {};
-    queue.forEach((p,i)=>{
-      if(!batches[p.batch]) batches[p.batch] = [];
-      batches[p.batch].push({p,i});
-    });
-    body.innerHTML = Object.entries(batches)
-      .sort(([a],[b])=>Number(a)-Number(b))
-      .map(([bn, entries])=>{
-        const batchNum = Number(bn);
-        const isCurrent = batchNum === currentBatch;
-        const allDone = entries.every(({p})=>{
-          const dis = p.disabledCombos || {};
-          const active = combos.filter(c=>!dis[c.id]);
-          return active.length===0 || active.every(c=>p.statuses[c.id]==='posted'||p.statuses[c.id]==='failed');
-        });
-        const divLabel = `Batch ${bn}${allDone ? ' ✓' : isCurrent ? ' — up next' : ''}`;
-        const divClass = `batch-divider${isCurrent?' current':''}${allDone?' done':''}`;
-        const divider = `<div class="${divClass}"><span class="batch-divider-label">${divLabel}</span></div>`;
-        return divider + entries.map(({p,i})=>renderQueueItem(p,i)).join('');
-      }).join('');
-  } else {
-    body.innerHTML = queue.map((p,i)=>renderQueueItem(p,i)).join('');
-  }
+  const currentBatch = getCurrentBatch();
+  const batches = {};
+  queue.forEach((p,i)=>{
+    const bn = p.batch || 1;
+    if(!batches[bn]) batches[bn] = [];
+    batches[bn].push({p,i});
+  });
+  body.innerHTML = Object.entries(batches)
+    .sort(([a],[b])=>Number(a)-Number(b))
+    .map(([bn, entries])=>{
+      const batchNum = Number(bn);
+      const isCurrent = batchNum === currentBatch;
+      const allDone = entries.every(({p})=>{
+        const dis = p.disabledCombos || {};
+        const active = combos.filter(c=>!dis[c.id]);
+        return active.length===0 || active.every(c=>p.statuses[c.id]==='posted'||p.statuses[c.id]==='failed');
+      });
+      const divLabel = `Batch ${bn}${allDone ? ' ✓' : isCurrent ? ' — up next' : ''}`;
+      const divClass = `batch-divider${isCurrent?' current':''}${allDone?' done':''}`;
+      const divider = `<div class="${divClass}"><span class="batch-divider-label">${divLabel}</span></div>`;
+      return divider + entries.map(({p,i})=>renderQueueItem(p,i)).join('');
+    }).join('');
 
   progressFooter.style.display = 'block';
   updateProgressBar();
@@ -1318,8 +1351,9 @@ function clearDone(){
     const active = combos.filter(c=>!dis[c.id]);
     return !(active.length===0 || active.every(c=>p.statuses[c.id]==='posted'));
   });
-  queue.forEach(p=>p.batch=null);
-  saveQueue(); renderQueue(); updateLaunchBtn();
+  splitIntoBatches();
+  renderQueue();
+  updateLaunchBtn();
 }
 
 function clearAll(){
@@ -1390,11 +1424,6 @@ function updateLaunchBtn(){
   }
 
   btn.disabled = false;
-
-  if(!hasBatchAssignments()){
-    btn.innerHTML = '&#10022; Split &amp; Generate';
-    return;
-  }
 
   const currentBatch = getCurrentBatch();
   if(currentBatch == null){
@@ -1710,9 +1739,6 @@ async function launch(){
     toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
     return;
   }
-  // Auto-split if not yet done
-  if(!hasBatchAssignments()) splitIntoBatches();
-
   const items = getCurrentBatchItems();
   if(!items.length){ toast('Nothing left to post!'); return; }
   const prompt = buildPrompt(items);
