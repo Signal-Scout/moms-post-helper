@@ -12,157 +12,80 @@
     --ink: #1c1008; --ink-mid: #5a3820; --ink-light: #9c7d60;
     --sage: #4e8f6a; --sage-light: #e2f0e8; --sage-dark: #2e6247;
     --gold: #c08010; --gold-light: #fdf3d4;
+    --red: #c43030; --red-light: #fdecea;
     --shadow: rgba(28,16,8,0.07); --shadow-md: rgba(28,16,8,0.12); --shadow-lg: rgba(28,16,8,0.2);
-    --red: #c43030;
   }
-
   * { margin:0; padding:0; box-sizing:border-box; }
-
-  /* Grain */
   body::before {
     content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.04;
     background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size:180px;
   }
-
   body {
-    font-family:'DM Sans',sans-serif;
-    background:var(--cream-dark);
+    font-family:'DM Sans',sans-serif; background:var(--cream-dark);
     min-height:100vh; color:var(--ink);
     background-image:
       radial-gradient(ellipse 90% 55% at 20% -5%, rgba(179,97,45,0.14) 0%, transparent 60%),
       radial-gradient(ellipse 70% 50% at 90% 105%, rgba(78,143,106,0.11) 0%, transparent 55%);
   }
+  .wrap { position:relative; z-index:1; max-width:680px; margin:0 auto; padding:44px 20px 100px; }
 
-  .wrap { position:relative; z-index:1; max-width:620px; margin:0 auto; padding:48px 20px 110px; }
-
-  /* ── Header ── */
-  .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:40px; }
+  /* Header */
+  .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:36px; }
   .header-eyebrow { font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--terra); margin-bottom:10px; opacity:.85; }
-  .header-title { font-family:'Fraunces',serif; font-size:46px; font-weight:700; color:var(--ink); line-height:.95; letter-spacing:-2.5px; }
+  .header-title { font-family:'Fraunces',serif; font-size:44px; font-weight:700; color:var(--ink); line-height:.95; letter-spacing:-2.5px; }
   .header-title em { font-style:italic; color:var(--terra); }
+  .header-right { display:flex; align-items:center; gap:10px; margin-top:8px; }
 
-  /* Settings gear */
-  .settings-btn {
-    margin-top:8px; width:42px; height:42px; border-radius:13px;
+  /* Header icon buttons */
+  .icon-btn {
+    width:42px; height:42px; border-radius:13px;
     background:var(--cream); border:1.5px solid var(--border);
     box-shadow:0 2px 8px var(--shadow), inset 0 1px 0 rgba(255,255,255,.9);
     cursor:pointer; display:flex; align-items:center; justify-content:center;
     font-size:17px; flex-shrink:0; position:relative;
     transition:background .2s, border-color .2s, box-shadow .2s;
   }
-  .settings-btn:hover { background:white; border-color:var(--ink-light); box-shadow:0 4px 14px var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.9); }
+  .icon-btn:hover { background:white; border-color:var(--ink-light); box-shadow:0 4px 14px var(--shadow-md); }
   .settings-btn:hover .gear-icon { transform:rotate(45deg); }
   .gear-icon { display:inline-block; transition:transform .35s cubic-bezier(.34,1.56,.64,1); }
   .settings-dot { position:absolute; top:7px; right:7px; width:7px; height:7px; border-radius:50%; background:var(--terra); border:2px solid var(--cream-dark); display:none; }
   .settings-dot.show { display:block; }
 
-  /* ── Step nav ── */
-  .step-nav {
-    display:flex; margin-bottom:28px;
-    background:white; border:1px solid var(--border); border-radius:16px; padding:5px;
-    box-shadow:0 2px 12px var(--shadow), inset 0 1px 0 rgba(255,255,255,.8);
-    gap:3px;
+  /* Info popover */
+  .info-popover-wrap { position:relative; }
+  .info-popover {
+    display:none; position:absolute; top:calc(100% + 10px); right:0; z-index:100;
+    background:white; border:1.5px solid var(--border); border-radius:16px;
+    box-shadow:0 12px 40px var(--shadow-lg); padding:18px 20px; width:290px;
+    animation:sheetIn .2s cubic-bezier(.22,1,.36,1);
   }
-  .step-pill {
-    flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
-    padding:10px 8px; border-radius:12px; cursor:pointer;
-    transition:background .2s, color .2s; font-size:13px; font-weight:500;
-    color:var(--ink-light); user-select:none;
-  }
-  .step-pill.active {
-    background:linear-gradient(135deg, #2c1a0a 0%, #3d2510 100%);
-    color:white;
-    box-shadow:0 2px 10px rgba(28,16,8,.3), inset 0 1px 0 rgba(255,255,255,.1);
-  }
-  .step-pill.done { color:var(--sage-dark); }
-  .step-pill.done .pill-num { background:var(--sage); color:white; }
-  .pill-num {
-    width:20px; height:20px; border-radius:50%;
-    background:var(--cream-dark); color:var(--ink-light);
-    font-size:11px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0; transition:background .2s, color .2s;
-  }
-  .step-pill.active .pill-num { background:rgba(255,255,255,.18); color:white; }
-  @media(max-width:480px){.pill-label{display:none}}
+  .info-popover.open { display:block; }
+  .info-popover-title { font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+  .info-popover p { font-size:13px; color:var(--ink-mid); line-height:1.65; }
 
-  /* ── Panels ── */
-  .panel { display:none; }
-  .panel.active { display:block; }
-  .panel.active > * { animation:fadeUp .32s cubic-bezier(.22,1,.36,1) both; }
-  .panel.active > *:nth-child(1){animation-delay:.03s}
-  .panel.active > *:nth-child(2){animation-delay:.08s}
-  .panel.active > *:nth-child(3){animation-delay:.13s}
-  .panel.active > *:nth-child(4){animation-delay:.18s}
-  .panel.active > *:nth-child(5){animation-delay:.22s}
-  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  /* No-combos warning */
+  .no-combos-warn {
+    background:var(--terra-light); border:1px solid rgba(179,97,45,.25);
+    border-radius:13px; padding:14px 16px;
+    font-size:13px; color:var(--terra-dark); line-height:1.55;
+    margin-bottom:16px; display:none; gap:10px; align-items:center;
+    box-shadow:0 2px 10px rgba(179,97,45,.08);
+  }
+  .no-combos-warn.show { display:flex; }
+  .no-combos-warn button {
+    background:var(--terra); color:white; border:none; border-radius:8px;
+    padding:7px 14px; font-size:12px; font-weight:600; font-family:'DM Sans',sans-serif;
+    cursor:pointer; white-space:nowrap; flex-shrink:0; transition:background .15s;
+  }
+  .no-combos-warn button:hover { background:var(--terra-dark); }
 
-  /* ── Settings overlay ── */
-  .settings-overlay {
-    display:none; position:fixed; inset:0; z-index:200;
-    background:rgba(28,16,8,.4); backdrop-filter:blur(6px);
-    align-items:flex-start; justify-content:center;
-    padding:40px 20px; overflow-y:auto;
-  }
-  .settings-overlay.open { display:flex; }
-  .settings-sheet {
-    background:var(--cream); border-radius:24px; border:1px solid var(--border);
-    box-shadow:0 24px 80px rgba(28,16,8,.28), 0 8px 24px rgba(28,16,8,.12);
-    width:100%; max-width:560px;
-    animation:sheetIn .3s cubic-bezier(.22,1,.36,1); overflow:hidden;
-  }
-  @keyframes sheetIn { from{opacity:0;transform:translateY(20px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
-  .settings-header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:22px 24px; border-bottom:1px solid var(--border);
-    background:white;
-  }
-  .settings-title { font-family:'Fraunces',serif; font-size:22px; font-weight:600; letter-spacing:-.5px; }
-  .settings-close {
-    width:32px; height:32px; border-radius:8px;
-    background:var(--cream-dark); border:none; cursor:pointer;
-    font-size:14px; display:flex; align-items:center; justify-content:center;
-    transition:background .15s, transform .15s;
-  }
-  .settings-close:hover { background:var(--border); transform:scale(1.1); }
-  .settings-body { padding:24px; }
-  .settings-section-label { font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-light); margin-bottom:12px; }
-  .accounts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-  .account-pill {
-    display:flex; align-items:center; gap:9px;
-    border:1.5px solid var(--border); border-radius:11px;
-    padding:10px 13px; background:white;
-    transition:border-color .15s, box-shadow .15s;
-    box-shadow:0 1px 4px var(--shadow);
-  }
-  .account-pill:focus-within { border-color:var(--terra); box-shadow:0 0 0 3px rgba(179,97,45,.1); }
-  .acc-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-  .acc-inp { border:none; background:transparent; font-size:14px; font-weight:500; color:var(--ink); outline:none; width:100%; font-family:'DM Sans',sans-serif; padding:0; }
-  .name-hint { border-radius:10px; padding:11px 14px; font-size:13px; line-height:1.55; display:flex; flex-direction:column; gap:8px; }
-  .name-hint.warn { background:var(--terra-light); border:1px solid rgba(179,97,45,.25); color:var(--terra-dark); }
-  .name-hint.ok { background:var(--sage-light); border:1px solid rgba(78,143,106,.3); color:var(--sage-dark); font-weight:500; }
-  .confirm-names-btn { align-self:flex-start; background:var(--terra); color:white; border:none; border-radius:6px; padding:5px 14px; font-size:12px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; display:none; transition:background .15s; }
-  .confirm-names-btn:hover { background:var(--terra-dark); }
-  .settings-save-btn {
-    width:100%; padding:15px; background:var(--ink); color:white; border:none;
-    border-radius:13px; font-family:'Fraunces',serif; font-size:18px; font-weight:600;
-    cursor:pointer; margin-top:22px;
-    transition:background .2s, transform .1s;
-    box-shadow:0 4px 16px var(--shadow-lg);
-  }
-  .settings-save-btn:hover { background:#2e1a08; }
-  .settings-save-btn:active { transform:scale(.99); }
-
-  /* ── Cards ── */
+  /* Cards */
   .card {
-    background:white; border-radius:20px;
-    border:1px solid var(--border);
+    background:white; border-radius:20px; border:1px solid var(--border);
     box-shadow:0 2px 16px var(--shadow), 0 1px 0 rgba(255,255,255,.9) inset;
-    margin-bottom:14px; overflow:hidden;
-    position:relative;
+    margin-bottom:14px; overflow:hidden; position:relative;
   }
-  /* Subtle top highlight edge */
   .card::before {
     content:''; position:absolute; top:0; left:0; right:0; height:1px;
     background:linear-gradient(90deg, transparent, rgba(255,255,255,.9) 30%, rgba(255,255,255,.9) 70%, transparent);
@@ -175,216 +98,250 @@
   }
   .card-label { font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-light); display:flex; align-items:center; gap:6px; }
   .card-dot { width:5px; height:5px; border-radius:50%; background:var(--terra); }
-  .card-body { padding:20px; }
+  .card-body { padding:18px 20px; }
 
-  /* ── Inputs ── */
-  input[type=text], textarea {
-    width:100%; border:1.5px solid var(--border); border-radius:11px;
+  /* URL Input row */
+  .url-row { display:flex; gap:10px; }
+  .url-row input {
+    flex:1; border:1.5px solid var(--border); border-radius:11px;
     padding:12px 14px; font-family:'DM Sans',sans-serif; font-size:15px;
     color:var(--ink); background:var(--cream); outline:none;
     transition:border-color .2s, box-shadow .2s, background .2s;
   }
-  input[type=text]:focus, textarea:focus {
-    border-color:var(--terra);
-    box-shadow:0 0 0 3.5px rgba(179,97,45,.12);
-    background:white;
+  .url-row input:focus { border-color:var(--terra); box-shadow:0 0 0 3.5px rgba(179,97,45,.12); background:white; }
+  .url-row input::placeholder { color:#c0a88a; }
+  .add-btn {
+    padding:12px 20px; background:var(--ink); color:white; border:none; border-radius:11px;
+    font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer;
+    white-space:nowrap; transition:background .15s, transform .1s;
+    box-shadow:0 2px 10px var(--shadow-md);
   }
-  input::placeholder, textarea::placeholder { color:#c0a88a; font-weight:400; }
-  textarea { min-height:130px; resize:vertical; line-height:1.65; }
-  .input-footer { display:flex; justify-content:flex-end; margin-top:8px; }
-  .char-count { font-size:12px; color:var(--ink-light); }
-  .char-count.warn { color:var(--gold); font-weight:600; }
-  .char-count.over { color:var(--red); font-weight:700; }
+  .add-btn:hover { background:#2e1a08; }
+  .add-btn:active { transform:scale(.98); }
+  .add-btn:disabled { background:var(--border); color:var(--ink-light); cursor:not-allowed; box-shadow:none; }
 
-  /* ── No-accounts warning ── */
-  .no-accounts-warn {
-    background:var(--terra-light); border:1px solid rgba(179,97,45,.25);
-    border-radius:13px; padding:14px 16px;
-    font-size:13px; color:var(--terra-dark); line-height:1.55;
-    margin-bottom:14px; display:none; gap:10px; align-items:center;
-    box-shadow:0 2px 10px rgba(179,97,45,.08);
+  /* Queue list */
+  .queue-empty {
+    text-align:center; padding:40px 20px; color:var(--ink-light); font-size:14px; line-height:1.6;
   }
-  .no-accounts-warn.show { display:flex; }
-  .no-accounts-warn button {
-    background:var(--terra); color:white; border:none; border-radius:8px;
-    padding:7px 14px; font-size:12px; font-weight:600;
-    font-family:'DM Sans',sans-serif; cursor:pointer; white-space:nowrap; flex-shrink:0;
-    transition:background .15s;
-  }
-  .no-accounts-warn button:hover { background:var(--terra-dark); }
+  .queue-empty-icon { font-size:36px; margin-bottom:12px; opacity:.5; }
 
-  /* ── Footer toggle ── */
-  .footer-toggle-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .toggle-label { font-size:14px; font-weight:500; color:var(--ink); display:flex; align-items:center; gap:8px; }
-  .toggle-sub { font-size:12px; color:var(--ink-light); font-weight:400; }
-  .toggle-switch { position:relative; width:44px; height:25px; flex-shrink:0; }
-  .toggle-switch input { opacity:0; width:0; height:0; }
-  .toggle-slider { position:absolute; inset:0; background:var(--border); border-radius:25px; cursor:pointer; transition:background .22s; box-shadow:inset 0 1px 3px rgba(0,0,0,.12); }
-  .toggle-slider::before { content:''; position:absolute; width:19px; height:19px; left:3px; top:3px; background:white; border-radius:50%; transition:transform .22s cubic-bezier(.34,1.56,.64,1); box-shadow:0 1px 5px rgba(0,0,0,.18); }
-  .toggle-switch input:checked + .toggle-slider { background:var(--sage); }
-  .toggle-switch input:checked + .toggle-slider::before { transform:translateX(19px); }
-  .footer-body { display:none; flex-direction:column; gap:10px; }
-  .footer-body.visible { display:flex; }
-  .custom-footer-input { width:100%; border:1.5px solid var(--border); border-radius:11px; padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); background:var(--cream); outline:none; resize:none; min-height:60px; line-height:1.5; }
-  .custom-footer-input:focus { border-color:var(--terra); box-shadow:0 0 0 3.5px rgba(179,97,45,.12); background:white; }
-  .disclosure-locked {
-    background:var(--sage-light); border:1px solid rgba(78,143,106,.28);
-    border-radius:11px; padding:11px 14px;
-    font-size:13px; color:var(--sage-dark); line-height:1.55;
-    display:flex; align-items:flex-start; gap:9px;
+  .queue-item {
+    display:flex; align-items:flex-start; gap:14px;
+    padding:14px 0; border-bottom:1px solid var(--border);
+    animation:fadeUp .25s cubic-bezier(.22,1,.36,1) both;
+    transition:opacity .15s;
   }
-  .lock-icon { flex-shrink:0; font-size:13px; margin-top:1px; }
-  .disclosure-locked-label { font-size:9.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--sage); margin-bottom:3px; display:block; }
+  .queue-item.no-anim { animation:none; }
+  .queue-item:last-child { border-bottom:none; }
+  .queue-item.drag-over { border-top:2px solid var(--terra); margin-top:-1px; }
+  .queue-item.dragging { opacity:.35; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ── Buttons ── */
+  .qi-drag {
+    color:var(--border); font-size:16px; cursor:grab; flex-shrink:0;
+    margin-top:5px; user-select:none; transition:color .15s; line-height:1;
+  }
+  .qi-drag:hover { color:var(--ink-light); }
+  .qi-drag:active { cursor:grabbing; }
+
+  .qi-num {
+    width:28px; height:28px; border-radius:50%; background:var(--cream-dark);
+    border:1.5px solid var(--border); flex-shrink:0;
+    font-size:12px; font-weight:700; color:var(--ink-light);
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .qi-content { flex:1; min-width:0; }
+  .qi-url { font-size:13px; font-weight:500; color:var(--ink); word-break:break-word; overflow-wrap:anywhere; margin-bottom:8px; line-height:1.4; }
+  .qi-url a { color:var(--terra-dark); text-decoration:none; }
+  .qi-url a:hover { text-decoration:underline; }
+  .qi-statuses { display:flex; flex-wrap:wrap; gap:5px; }
+
+  .queue-item.all-posted { opacity:.65; }
+  .queue-item.all-posted .qi-num { background:var(--sage-light); border-color:var(--sage); color:var(--sage-dark); }
+
+  .status-chip {
+    display:flex; align-items:center; gap:5px;
+    border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600;
+    border:1px solid transparent; cursor:pointer; user-select:none;
+    transition:opacity .15s, filter .15s;
+  }
+  .status-chip:hover { filter:brightness(.95); }
+  .status-chip.pending { background:var(--cream-dark); border-color:var(--border); color:var(--ink-light); }
+  .status-chip.working { background:var(--gold-light); border-color:rgba(192,128,16,.3); color:var(--gold); animation:pulse-chip .8s ease-in-out infinite alternate; }
+  .status-chip.posted  { background:var(--sage-light); border-color:rgba(78,143,106,.3); color:var(--sage-dark); cursor:default; }
+  .status-chip.failed  { background:var(--red-light); border-color:rgba(196,48,48,.2); color:var(--red); }
+  .status-chip.skipped { background:var(--cream-dark); border-color:var(--border); color:var(--border); text-decoration:line-through; opacity:.6; }
+  .status-chip.skipped .chip-dot { background:var(--border); }
+  @keyframes pulse-chip { from{opacity:.7} to{opacity:1} }
+
+  .chip-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .pending  .chip-dot { background:var(--ink-light); }
+  .working  .chip-dot { background:var(--gold); }
+  .posted   .chip-dot { background:var(--sage); }
+  .failed   .chip-dot { background:var(--red); }
+
+  .qi-remove {
+    background:none; border:none; cursor:pointer; color:var(--ink-light);
+    font-size:13px; padding:4px; flex-shrink:0; border-radius:6px;
+    transition:color .15s, background .15s; margin-top:2px;
+  }
+  .qi-remove:hover { color:var(--red); background:var(--red-light); }
+  .qi-retry {
+    background:none; border:none; cursor:pointer;
+    font-size:14px; padding:4px 6px; flex-shrink:0; border-radius:6px;
+    color:var(--ink-light); transition:color .15s, background .15s;
+    line-height:1;
+  }
+  .qi-retry:hover { color:var(--terra); background:var(--terra-light); }
+
+  /* Progress bar — lives inside queue card footer */
+  .progress-footer { padding:14px 20px 16px; border-top:1px solid var(--border); }
+  .progress-bar-track { height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+  .progress-bar-fill { height:100%; background:var(--sage); border-radius:99px; transition:width .4s ease; }
+  .progress-bar-label { font-size:11px; color:var(--ink-light); margin-top:6px; font-weight:500; }
+
+  /* Bottom action row */
+  .action-row { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+  .btn-ghost {
+    display:none; padding:10px 14px; background:none; color:var(--ink-light);
+    border:none; border-radius:11px; font-family:'DM Sans',sans-serif;
+    font-size:13px; font-weight:500; cursor:pointer; transition:color .15s, background .15s;
+  }
+  .btn-ghost:hover { color:var(--ink); background:var(--cream-dark); }
+  .btn-ghost.show { display:inline-flex; }
+
+  .toast-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .launch-section { margin-top:4px; }
+  .launch-info {
+    background:var(--cream); border:1px solid var(--border);
+    border-radius:13px; padding:13px 16px; font-size:13px; color:var(--ink-mid);
+    line-height:1.6; margin-bottom:14px; display:none;
+  }
+  .launch-info.show { display:block; }
+  .launch-info strong { color:var(--ink); }
+
+  /* Buttons */
   .btn-primary {
-    width:100%; padding:17px 24px;
+    width:100%; padding:16px 24px;
     background:linear-gradient(160deg, #2e1a0a 0%, #1c1008 60%);
     color:white; border:none; border-radius:15px;
-    font-family:'Fraunces',serif; font-size:20px; font-weight:600; letter-spacing:-.4px;
+    font-family:'Fraunces',serif; font-size:19px; font-weight:600; letter-spacing:-.4px;
     cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
     transition:transform .12s, box-shadow .2s;
     box-shadow:0 5px 22px rgba(28,16,8,.28), inset 0 1px 0 rgba(255,255,255,.08);
     position:relative; overflow:hidden;
   }
-  /* Shimmer sweep */
   .btn-primary::after {
     content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
     background:linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
-    transition:left .5s ease;
-    pointer-events:none;
+    transition:left .5s ease; pointer-events:none;
   }
   .btn-primary:hover::after { left:150%; }
-  .btn-primary:hover { box-shadow:0 8px 30px rgba(28,16,8,.32), inset 0 1px 0 rgba(255,255,255,.08); transform:translateY(-1px); }
+  .btn-primary:hover { box-shadow:0 8px 30px rgba(28,16,8,.32); transform:translateY(-1px); }
   .btn-primary:active { transform:scale(.99) translateY(0); }
   .btn-primary:disabled { background:var(--border); color:var(--ink-light); cursor:not-allowed; box-shadow:none; transform:none; }
   .btn-primary:disabled::after { display:none; }
 
   .btn-secondary {
-    padding:11px 20px; background:white; color:var(--ink);
+    padding:10px 18px; background:white; color:var(--ink);
     border:1.5px solid var(--border); border-radius:11px;
-    font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
+    font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
     cursor:pointer; transition:background .15s, border-color .15s;
     box-shadow:0 1px 4px var(--shadow);
   }
   .btn-secondary:hover { background:var(--cream); border-color:var(--ink-light); }
-  .btn-row { display:flex; gap:10px; margin-top:14px; }
-  .btn-row .btn-secondary { flex-shrink:0; }
-  .btn-row .btn-primary { flex:1; font-size:17px; padding:14px; }
 
-  /* ── Phase callout ── */
-  .phase-callout {
-    background:linear-gradient(145deg, #fffaee 0%, var(--gold-light) 100%);
-    border:1px solid rgba(192,128,16,.22);
-    border-radius:16px; padding:20px;
-    margin-bottom:18px;
-    box-shadow:0 2px 12px rgba(192,128,16,.08);
+  /* Settings overlay */
+  .settings-overlay {
+    display:none; position:fixed; inset:0; z-index:200;
+    background:rgba(28,16,8,.4); backdrop-filter:blur(6px);
+    align-items:flex-start; justify-content:center;
+    padding:40px 20px; overflow-y:auto;
   }
-  .phase-callout-title { font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
-  .phase-steps { display:flex; flex-direction:column; gap:10px; }
-  .phase-step { display:flex; gap:12px; align-items:flex-start; }
-  .phase-step-num {
-    width:22px; height:22px; border-radius:50%; flex-shrink:0;
-    background:var(--terra); color:white;
-    font-size:11px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 2px 6px rgba(179,97,45,.3);
-    margin-top:1px;
+  .settings-overlay.open { display:flex; }
+  .settings-sheet {
+    background:var(--cream); border-radius:24px; border:1px solid var(--border);
+    box-shadow:0 24px 80px rgba(28,16,8,.28), 0 8px 24px rgba(28,16,8,.12);
+    width:100%; max-width:580px;
+    animation:sheetIn .3s cubic-bezier(.22,1,.36,1); overflow:hidden;
   }
-  .phase-step-text { font-size:13px; color:#5a3e14; line-height:1.6; }
-  .phase-step-text strong { color:#3a2408; }
+  @keyframes sheetIn { from{opacity:0;transform:translateY(20px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .settings-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 24px; border-bottom:1px solid var(--border); background:white;
+  }
+  .settings-title { font-family:'Fraunces',serif; font-size:22px; font-weight:600; letter-spacing:-.5px; }
+  .settings-close {
+    width:32px; height:32px; border-radius:8px;
+    background:var(--cream-dark); border:none; cursor:pointer;
+    font-size:14px; display:flex; align-items:center; justify-content:center;
+    transition:background .15s;
+  }
+  .settings-close:hover { background:var(--border); }
+  .settings-body { padding:24px; }
+  .settings-section-label { font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-light); margin-bottom:14px; }
 
-  /* ── Preview ── */
-  .preview-block { background:var(--cream); border:1.5px solid var(--border); border-radius:14px; padding:18px; margin-bottom:12px; }
-  .preview-block-label { font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-light); margin-bottom:9px; }
-  .preview-link { font-size:13px; color:var(--terra-dark); word-break:break-all; font-weight:500; }
-  .preview-caption { font-size:15px; color:var(--ink); line-height:1.65; white-space:pre-wrap; word-break:break-word; }
-  .preview-footer { margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); font-size:13px; color:var(--ink-light); line-height:1.6; white-space:pre-wrap; font-style:italic; }
-  .preview-accounts { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
-  .preview-account-tag { display:flex; align-items:center; gap:5px; background:white; border:1px solid var(--border); border-radius:20px; padding:4px 11px; font-size:12px; font-weight:500; color:var(--ink-mid); box-shadow:0 1px 3px var(--shadow); }
-  .t-dot { width:7px; height:7px; border-radius:50%; }
-
-  /* ── Launch card ── */
-  .launch-card {
-    background:white; border-radius:20px; border:1px solid var(--border);
-    box-shadow:0 4px 20px var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.9);
-    overflow:hidden; margin-bottom:14px;
-  }
-  .launch-pulse {
-    background:linear-gradient(145deg, #3e7a58 0%, #2e6247 100%);
-    color:white; padding:26px 24px; text-align:center;
-    position:relative; overflow:hidden;
-  }
-  .launch-pulse::before {
-    content:''; position:absolute; inset:0;
-    background:radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,255,255,.12) 0%, transparent 70%);
-    animation:pulse 3s ease-in-out infinite;
-  }
-  .launch-pulse::after {
-    content:''; position:absolute; bottom:-1px; left:0; right:0; height:24px;
-    background:linear-gradient(0deg, white, transparent);
-    pointer-events:none;
-  }
-  @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
-  .launch-icon { font-size:40px; margin-bottom:10px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.2)); }
-  .launch-title { font-family:'Fraunces',serif; font-size:24px; font-weight:700; letter-spacing:-.6px; margin-bottom:4px; }
-  .launch-sub { font-size:13px; opacity:.82; }
-  .launch-steps { padding:22px 20px 20px; }
-  .launch-step { display:flex; gap:13px; align-items:flex-start; margin-bottom:16px; font-size:14px; color:var(--ink); line-height:1.55; }
-  .launch-step:last-child { margin-bottom:0; }
-  .launch-step-num {
-    width:26px; height:26px; border-radius:50%;
-    background:var(--ink); color:white;
-    font-size:12px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0; margin-top:0px;
-    box-shadow:0 2px 6px var(--shadow-md);
-  }
-  .launch-step-num.gold { background:linear-gradient(135deg, #d4960a, #b07a08); }
-
-  /* ── Progress ── */
-  .progress-card {
-    background:white; border-radius:20px; border:1px solid var(--border);
-    box-shadow:0 2px 16px var(--shadow), inset 0 1px 0 rgba(255,255,255,.9);
-    overflow:hidden;
-  }
-  .progress-top { padding:14px 20px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, var(--cream), rgba(254,250,243,.6)); display:flex; align-items:center; justify-content:space-between; }
-  .progress-label { font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-light); }
-  .progress-count { font-size:13px; font-weight:600; color:var(--ink-mid); }
-  .progress-grid { display:grid; grid-template-columns:repeat(4,1fr); padding:16px; gap:10px; }
-  .prog-item {
-    border:1.5px solid var(--border); border-radius:13px; padding:13px 8px;
-    text-align:center; cursor:pointer; background:var(--cream);
-    user-select:none;
-    transition:border-color .2s, background .2s, transform .15s, box-shadow .2s;
+  /* Combo rows */
+  .combo-list { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .combo-row {
+    background:white; border:1.5px solid var(--border); border-radius:13px;
+    padding:14px 16px; display:grid; gap:8px;
+    grid-template-columns:1fr 1fr;
+    position:relative;
     box-shadow:0 1px 4px var(--shadow);
+    transition:border-color .2s;
   }
-  .prog-item:hover { border-color:var(--ink-light); transform:translateY(-1px); box-shadow:0 4px 12px var(--shadow-md); }
-  .prog-item.done {
-    background:var(--sage-light); border-color:var(--sage);
-    box-shadow:0 2px 10px rgba(78,143,106,.2);
-    animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+  .combo-row:focus-within { border-color:var(--terra); }
+  .combo-row-header { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; }
+  .combo-badge {
+    display:flex; align-items:center; gap:7px;
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-mid);
   }
-  @keyframes popIn { from{transform:scale(.92)} to{transform:scale(1)} }
-  .prog-icon { font-size:22px; margin-bottom:5px; }
-  .prog-name { font-size:11px; font-weight:500; color:var(--ink-mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .prog-item.done .prog-name { color:var(--sage-dark); font-weight:700; }
-  .progress-footer { padding:0 16px 16px; display:flex; justify-content:space-between; align-items:center; }
-  .reset-btn { font-size:12px; color:var(--ink-light); background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color .15s; }
-  .reset-btn:hover { color:var(--terra); }
-  .all-done-badge {
-    display:none; background:linear-gradient(135deg, #3e7a58, #2e6247);
-    color:white; font-size:12px; font-weight:600; padding:5px 14px; border-radius:20px;
-    box-shadow:0 2px 8px rgba(78,143,106,.3);
+  .combo-color { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .combo-remove {
+    background:none; border:none; cursor:pointer; color:var(--ink-light);
+    font-size:12px; padding:3px 7px; border-radius:6px;
+    transition:color .15s, background .15s; font-family:'DM Sans',sans-serif;
   }
-  .all-done-badge.show { display:inline-flex; align-items:center; gap:5px; animation:popIn .35s cubic-bezier(.34,1.56,.64,1); }
+  .combo-remove:hover { color:var(--red); background:var(--red-light); }
+  .combo-field { display:flex; flex-direction:column; gap:5px; }
+  .combo-field.full { grid-column:1/-1; }
+  .combo-field label { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-light); }
+  .combo-field input {
+    border:1.5px solid var(--border); border-radius:8px; padding:8px 11px;
+    font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink); background:var(--cream);
+    outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  .combo-field input:focus { border-color:var(--terra); box-shadow:0 0 0 3px rgba(179,97,45,.1); background:white; }
+  .combo-field input::placeholder { color:#c0a88a; }
 
-  /* ── Toast ── */
-  .toast-wrap { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .add-combo-btn {
+    display:flex; align-items:center; gap:8px; justify-content:center;
+    width:100%; padding:12px; background:var(--cream); border:1.5px dashed var(--border);
+    border-radius:12px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    font-size:13px; font-weight:500; color:var(--ink-light);
+    transition:border-color .2s, color .2s, background .2s;
+  }
+  .add-combo-btn:hover { border-color:var(--terra); color:var(--terra); background:var(--terra-light); }
+
+  .settings-save-btn {
+    width:100%; padding:15px; background:var(--ink); color:white; border:none;
+    border-radius:13px; font-family:'Fraunces',serif; font-size:18px; font-weight:600;
+    cursor:pointer; margin-top:22px; transition:background .2s, transform .1s;
+    box-shadow:0 4px 16px var(--shadow-lg);
+  }
+  .settings-save-btn:hover { background:#2e1a08; }
+
+  /* Progress bar — lives inside queue card footer */
+  .progress-footer { padding:14px 20px 16px; border-top:1px solid var(--border); }
+  .progress-bar-track { height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+  .progress-bar-fill { height:100%; background:var(--sage); border-radius:99px; transition:width .4s ease; }
+  .progress-bar-label { font-size:11px; color:var(--ink-light); margin-top:6px; font-weight:500; }
+  .toast-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
   .toast {
-    background:linear-gradient(135deg, #2e1a0a, #1c1008);
-    color:white; padding:12px 22px; border-radius:100px;
-    font-size:14px; font-weight:500;
+    background:linear-gradient(135deg, #2e1a0a, #1c1008); color:white;
+    padding:11px 20px; border-radius:100px; font-size:14px; font-weight:500;
     display:flex; align-items:center; gap:8px;
     box-shadow:0 8px 28px rgba(28,16,8,.32), inset 0 1px 0 rgba(255,255,255,.08);
     animation:tIn .22s cubic-bezier(.22,1,.36,1), tOut .25s ease 2.4s forwards;
@@ -393,8 +350,36 @@
   @keyframes tIn  { from{opacity:0;transform:translateY(12px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
   @keyframes tOut { from{opacity:1} to{opacity:0;transform:translateY(-6px)} }
 
-  .copy-again { font-size:12px; color:var(--ink-light); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; transition:color .15s; }
-  .copy-again:hover { color:var(--terra); }
+  /* All done state */
+  .all-done-banner {
+    background:linear-gradient(145deg, #3e7a58, #2e6247); color:white;
+    border-radius:16px; padding:20px 22px; text-align:center;
+    margin-bottom:14px; display:none;
+    box-shadow:0 4px 18px rgba(78,143,106,.3);
+  }
+  .all-done-banner.show { display:block; animation:fadeUp .35s cubic-bezier(.22,1,.36,1); }
+  .all-done-banner-title { font-family:'Fraunces',serif; font-size:22px; font-weight:700; letter-spacing:-.4px; margin-bottom:4px; }
+  .all-done-banner-sub { font-size:13px; opacity:.82; }
+
+  /* Copy fallback */
+  .copy-fallback-overlay {
+    position:fixed; inset:0; z-index:9999; background:rgba(28,16,8,.55);
+    backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .copy-fallback-sheet {
+    background:var(--cream); border-radius:20px; border:1px solid var(--border);
+    box-shadow:0 20px 60px rgba(28,16,8,.3); width:100%; max-width:520px; overflow:hidden;
+  }
+  .copy-fallback-header {
+    padding:16px 22px; border-bottom:1px solid var(--border); background:white;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .copy-fallback-header span { font-family:'Fraunces',serif; font-size:18px; font-weight:600; }
+  .copy-fallback-close { width:30px; height:30px; border-radius:7px; background:var(--cream-dark); border:none; cursor:pointer; font-size:14px; }
+  .copy-fallback-body { padding:16px 22px; }
+  .copy-fallback-body p { font-size:13px; color:var(--ink-light); margin-bottom:10px; }
+  .copy-fallback-ta { width:100%; height:140px; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; font-family:monospace; color:var(--ink); background:var(--cream); resize:none; outline:none; }
+  .copy-fallback-go { margin-top:10px; width:100%; padding:12px; background:var(--ink); color:white; border:none; border-radius:10px; font-family:'Fraunces',serif; font-size:17px; font-weight:600; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -402,143 +387,73 @@
 
   <!-- Header -->
   <div class="header">
-    <div class="header-text">
+    <div>
       <div class="header-eyebrow">Claude in Chrome Workflow</div>
       <h1 class="header-title">Mom's <em>Post Helper</em></h1>
     </div>
-    <button class="settings-btn" onclick="openSettings()" title="Settings">
-      <span class="gear-icon">&#9881;</span>
-      <span class="settings-dot" id="settingsDot"></span>
+    <div class="header-right">
+      <div class="info-popover-wrap">
+        <button class="icon-btn" onclick="toggleInfo(event)" title="How this works" style="font-family:'Fraunces',serif;font-style:italic;font-size:20px;font-weight:600;color:var(--ink-mid);">i</button>
+        <div class="info-popover" id="infoPopover">
+          <div class="info-popover-title">How this works</div>
+          <p>Add Amazon URLs to your queue. Claude will open each product page, use <strong>Chickadeasy</strong> to generate the affiliate caption, then post to each of your Facebook groups using the correct account — automatically. Set up your account + group combos in Settings first.</p>
+        </div>
+      </div>
+      <button class="icon-btn settings-btn" onclick="openSettings()" title="Settings">
+        <span class="gear-icon">&#9881;</span>
+        <span class="settings-dot" id="settingsDot"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- No combos warning -->
+  <div class="no-combos-warn" id="noCombosWarn">
+    <span>&#9888; Set up your Facebook account + group combos in Settings before posting.</span>
+    <button onclick="openSettings()">Open Settings</button>
+  </div>
+
+  <!-- URL input -->
+  <div class="card">
+    <div class="card-body">
+      <div class="url-row">
+        <input type="text" id="urlInput" placeholder="Paste an Amazon product URL to add to queue..." onkeydown="if(event.key==='Enter')addToQueue()" oninput="updateAddBtn()">
+        <button class="add-btn" id="addBtn" onclick="addToQueue()" disabled>Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Queue -->
+  <div class="card">
+    <div class="card-top">
+      <span class="card-label"><span class="card-dot"></span>Queue</span>
+      <span id="queueCount" style="font-size:12px;color:var(--ink-light);font-weight:500"></span>
+    </div>
+    <div class="card-body" id="queueBody" style="padding:0 20px">
+    </div>
+    <div class="progress-footer" id="progressFooter" style="display:none">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-bar-label" id="progressLabel"></div>
+    </div>
+  </div>
+
+  <!-- All done banner -->
+  <div class="all-done-banner" id="allDoneBanner">
+    <div style="font-size:36px;margin-bottom:8px">&#127881;</div>
+    <div class="all-done-banner-title">All done!</div>
+    <div class="all-done-banner-sub">All enabled combos posted successfully.</div>
+  </div>
+
+  <!-- Launch -->
+  <div class="launch-section">
+    <div class="launch-info" id="launchInfo">
+      <strong>Ready?</strong> Hit the button below to copy the automation prompt, then paste it into the Claude sidebar. Claude handles everything from there — one product at a time, updating this dashboard as it goes.
+    </div>
+    <button class="btn-primary" id="launchBtn" onclick="launch()" disabled>
+      &#10022; Generate &amp; Copy Prompt
     </button>
-  </div>
-
-  <!-- Step nav (3 steps) -->
-  <div class="step-nav">
-    <div class="step-pill active" id="pill-0" onclick="goStep(0)"><span class="pill-num" id="pnum-0">1</span><span class="pill-label">Compose</span></div>
-    <div class="step-pill" id="pill-1" onclick="goStep(1)"><span class="pill-num" id="pnum-1">2</span><span class="pill-label">Preview</span></div>
-    <div class="step-pill" id="pill-2" onclick="goStep(2)"><span class="pill-num" id="pnum-2">3</span><span class="pill-label">Launch</span></div>
-  </div>
-
-  <!-- PANEL 0: Compose -->
-  <div class="panel active" id="panel-0">
-
-    <div class="phase-callout">
-      <div class="phase-callout-title">&#10024; How this works</div>
-      <div class="phase-steps">
-        <div class="phase-step">
-          <div class="phase-step-num">1</div>
-          <div class="phase-step-text">Claude writes <strong>4 polished captions</strong> from your rough notes and shows them to you in the sidebar.</div>
-        </div>
-        <div class="phase-step">
-          <div class="phase-step-num">2</div>
-          <div class="phase-step-text">Review them, ask for tweaks if you want, then say <strong>"post them"</strong> -- Claude handles everything from there.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="no-accounts-warn" id="noAccountsWarn">
-      <span>&#9888; Add your Facebook account names in Settings before posting.</span>
-      <button onclick="openSettings()">Open Settings</button>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-label"><span class="card-dot"></span>Your link</span>
-        <span id="linkOk" style="display:none;font-size:12px;color:var(--sage-dark);font-weight:500">&#10003; Looks good</span>
-      </div>
-      <div class="card-body">
-        <input type="text" id="link" placeholder="Paste your Amazon or product link here..." oninput="onLink()">
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-top"><span class="card-label"><span class="card-dot"></span>Your rough caption</span></div>
-      <div class="card-body">
-        <textarea id="caption" placeholder="Describe the product and why you love it. Rough notes are fine -- Claude will polish this into 4 unique captions, one per account, before posting." oninput="onCaption()"></textarea>
-        <div class="input-footer">
-          <span class="char-count" id="charCount">0 characters</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-primary" id="composeNextBtn" onclick="goStep(1)" disabled>Preview &#8594;</button>
-    </div>
-  </div>
-
-  <!-- PANEL 1: Preview -->
-  <div class="panel" id="panel-1">
-
-    <div class="preview-block">
-      <div class="preview-block-label">Link</div>
-      <div class="preview-link" id="prevLink">--</div>
-    </div>
-
-    <div class="preview-block">
-      <div class="preview-block-label">Your rough caption (Claude will polish this)</div>
-      <div class="preview-caption" id="prevCaption">--</div>
-      <div class="preview-footer" id="prevFooter" style="display:none"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top"><span class="card-label"><span class="card-dot"></span>Will post to these accounts</span></div>
-      <div class="card-body" style="padding:14px 20px">
-        <div class="preview-accounts" id="prevAccounts"></div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-secondary" onclick="goStep(0)">&larr; Edit</button>
-      <button class="btn-primary" onclick="generateAndLaunch()" style="background:var(--sage)">&#10003; Copy &amp; Launch &#8594;</button>
-    </div>
-  </div>
-
-  <!-- PANEL 2: Launch -->
-  <div class="panel" id="panel-2">
-    <div class="launch-card">
-      <div class="launch-pulse">
-        <div class="launch-icon">&#10022;</div>
-        <div class="launch-title">Prompt copied!</div>
-        <div class="launch-sub">Open the Claude sidebar and paste it in</div>
-      </div>
-      <div class="launch-steps">
-        <div class="launch-step">
-          <div class="launch-step-num">1</div>
-          <div>Click the <strong>&#10022; Claude icon</strong> in your Chrome toolbar, press <strong>Ctrl+V</strong> to paste, then <strong>Enter</strong></div>
-        </div>
-        <div class="launch-step">
-          <div class="launch-step-num gold">2</div>
-          <div><strong>Claude writes 4 captions</strong> and shows them to you. Read them over -- ask for changes if you want!</div>
-        </div>
-        <div class="launch-step">
-          <div class="launch-step-num gold">3</div>
-          <div>When you're happy, type <strong>"post them"</strong> -- Claude posts to all 4 accounts automatically</div>
-        </div>
-        <div class="launch-step">
-          <div class="launch-step-num">4</div>
-          <div>Tick each account below as Claude confirms it's done</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-      <button class="copy-again" onclick="copyAgain()">&#8634; Copy prompt again</button>
-    </div>
-
-    <div class="progress-card">
-      <div class="progress-top">
-        <span class="progress-label">Progress</span>
-        <span class="progress-count" id="progressCount">0 of 4 posted</span>
-      </div>
-      <div class="progress-grid" id="progressGrid"></div>
-      <div class="progress-footer">
-        <button class="reset-btn" onclick="resetProgress()">&#8634; Reset</button>
-        <span class="all-done-badge" id="allDoneBadge">&#127881; All posted!</span>
-      </div>
-    </div>
-
-    <div class="btn-row" style="margin-top:14px">
-      <button class="btn-secondary" onclick="startOver()">Start a new post</button>
+    <div class="action-row">
+      <button class="btn-ghost" id="clearDoneBtn" onclick="clearDone()">Clear posted</button>
+      <button class="btn-ghost" id="clearAllBtn" onclick="clearAll()">Clear all</button>
     </div>
   </div>
 
@@ -552,37 +467,13 @@
       <button class="settings-close" onclick="closeSettings()">&#10005;</button>
     </div>
     <div class="settings-body">
-      <div class="settings-section-label">Facebook account names</div>
-      <div class="accounts-grid">
-        <div class="account-pill"><span class="acc-dot" style="background:#7eb8a0"></span><input class="acc-inp" id="acc0" placeholder="e.g. Jane Smith" oninput="onAccChange()"></div>
-        <div class="account-pill"><span class="acc-dot" style="background:#e8856a"></span><input class="acc-inp" id="acc1" placeholder="e.g. Jane's Deals" oninput="onAccChange()"></div>
-        <div class="account-pill"><span class="acc-dot" style="background:#c9913a"></span><input class="acc-inp" id="acc2" placeholder="e.g. Bargain Finds" oninput="onAccChange()"></div>
-        <div class="account-pill"><span class="acc-dot" style="background:#8a85d4"></span><input class="acc-inp" id="acc3" placeholder="e.g. Mom's Picks" oninput="onAccChange()"></div>
-      </div>
-      <div class="name-hint warn" id="nameHint">
-        <span>&#9888; Use the <strong>exact names</strong> shown in Facebook's account switcher. Claude reads these to click the right account.</span>
-        <button class="confirm-names-btn" id="confirmNamesBtn" onclick="confirmNames()">&#10003; These names are correct, save them</button>
-      </div>
-      <div style="margin-top:20px;">
-        <div class="settings-section-label" style="margin-bottom:12px;">Post footer</div>
-        <div class="footer-toggle-row">
-          <span class="toggle-label">Amazon affiliate post? <span class="toggle-sub">Adds required disclosure</span></span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="affiliateToggle" onchange="onFooterChange()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="footer-body" id="footerBody">
-          <textarea class="custom-footer-input" id="customFooter" placeholder="Optional: tagline, call to action, or hashtags (placed above the disclosure)..." oninput="onFooterChange()"></textarea>
-          <div class="disclosure-locked">
-            <span class="lock-icon">&#128274;</span>
-            <div>
-              <span class="disclosure-locked-label">Required Amazon disclosure -- always included</span>
-              As an Amazon Associate I earn from qualifying purchases.
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="settings-section-label">Facebook Account + Group Combos</div>
+      <p style="font-size:13px;color:var(--ink-light);line-height:1.6;margin-bottom:16px;">
+        Each combo is one Facebook account + one group. Claude will post to every combo for every product in your queue.
+        Use the <strong>exact account name</strong> shown in Facebook's account switcher.
+      </p>
+      <div class="combo-list" id="comboList"></div>
+      <button class="add-combo-btn" onclick="addCombo()" id="addComboBtn">&#43; Add account + group combo</button>
       <button class="settings-save-btn" onclick="closeSettings()">Done</button>
     </div>
   </div>
@@ -591,337 +482,558 @@
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
-const DOTS = ['#7eb8a0','#e8856a','#c9913a','#8a85d4'];
-const CHAR_MAX = 63206;
-const DISCLOSURE = 'As an Amazon Associate I earn from qualifying purchases.';
+const COMBO_COLORS = ['#7eb8a0','#e8856a','#c9913a','#8a85d4','#d47eb8','#6aa3d4','#8ac470','#d4a46a'];
+let queue = [];
+let combos = [];
 
-let doneSet = new Set();
-let lastPrompt = '';
+function extractAsin(url){
+  const m = url.match(/\/(?:dp|gp\/product|ASIN)\/([A-Z0-9]{10})/i);
+  return m ? m[1].toUpperCase() : null;
+}
 
-function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,String(v)); }catch(e){ return null; } }
-function ld(k){ try{ localStorage.removeItem(k); }catch(e){} }
+function getInvalidCombos(){
+  return combos.filter(c => !c.accountName.trim() || !c.groupUrl.trim() || !(c.template||'').trim());
+}
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v)); }catch(e){ return null; } }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function saveQueue(){ ls('mph2_queue', JSON.stringify(queue)); }
+function loadQueue(){ try{ const v=ls('mph2_queue'); queue=v?JSON.parse(v):[]; }catch(e){ queue=[]; } }
+function saveCombos(){ ls('mph2_combos', JSON.stringify(combos)); }
+function loadCombos(){ try{ const v=ls('mph2_combos'); combos=v?JSON.parse(v):[]; }catch(e){ combos=[]; } }
+
+// ── Init ──
 function init(){
-  ['acc0','acc1','acc2','acc3'].forEach((id,i)=>{
-    const v=ls('mh_acc_'+i); if(v) document.getElementById(id).value=v;
-  });
-  const link=ls('mh_link'), cap=ls('mh_cap');
-  if(link){ document.getElementById('link').value=link; onLink(); }
-  if(cap) { document.getElementById('caption').value=cap; onCaption(); }
-  if(ls('mh_affiliate')==='true'){
-    document.getElementById('affiliateToggle').checked=true;
-    document.getElementById('footerBody').className='footer-body visible';
+  loadQueue();
+  loadCombos();
+  renderSettingsCombos();
+  renderQueue();
+  checkWarning();
+  updateAddBtn();
+  updateLaunchBtn();
+}
+
+// ── Combos ──
+function addCombo(){
+  if(combos.length >= 8){ toast('Max 8 combos'); return; }
+  combos.push({ id:'c'+Date.now(), accountName:'', groupName:'', groupUrl:'', template:'', color:COMBO_COLORS[combos.length%COMBO_COLORS.length] });
+  saveCombos();
+  renderSettingsCombos();
+}
+
+function removeCombo(id){
+  combos = combos.filter(c=>c.id!==id);
+  saveCombos();
+  renderSettingsCombos();
+  renderQueue(); // status chips change
+  checkWarning();
+}
+
+function updateCombo(id, field, value){
+  const c = combos.find(c=>c.id===id);
+  if(c){ c[field]=value; saveCombos(); }
+}
+
+function renderSettingsCombos(){
+  const list = document.getElementById('comboList');
+  if(combos.length===0){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:var(--ink-light);font-size:13px;">No combos yet — add one below</div>';
+    document.getElementById('addComboBtn').style.display='flex';
+    return;
   }
-  const cf=ls('mh_custom_footer'); if(cf) document.getElementById('customFooter').value=cf;
-  applyConfirmedState();
-  checkAccountsWarning();
-  renderProgress();
+  list.innerHTML = combos.map((c,i)=>`
+    <div class="combo-row" id="crow_${c.id}">
+      <div class="combo-row-header">
+        <span class="combo-badge"><span class="combo-color" style="background:${c.color}"></span>Combo ${i+1}</span>
+        <button class="combo-remove" onclick="removeCombo('${c.id}')">&#10005; Remove</button>
+      </div>
+      <div class="combo-field">
+        <label>Facebook Account Name</label>
+        <input type="text" placeholder="e.g. Jane Smith" value="${esc(c.accountName)}"
+          oninput="updateCombo('${c.id}','accountName',this.value)">
+      </div>
+      <div class="combo-field">
+        <label>Group Name (for reference)</label>
+        <input type="text" placeholder="e.g. Jane's Deals" value="${esc(c.groupName)}"
+          oninput="updateCombo('${c.id}','groupName',this.value)">
+      </div>
+      <div class="combo-field full">
+        <label>Facebook Group URL</label>
+        <input type="text" placeholder="https://facebook.com/groups/..." value="${esc(c.groupUrl)}"
+          oninput="updateCombo('${c.id}','groupUrl',this.value)">
+      </div>
+      <div class="combo-field full">
+        <label>Chickadeasy Template Name</label>
+        <input type="text" placeholder="Exact name from Chickadeasy dropdown, e.g. Default Template" value="${esc(c.template||'')}"
+          oninput="updateCombo('${c.id}','template',this.value)">
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('addComboBtn').style.display = combos.length<8 ? 'flex' : 'none';
 }
 
-// ── Settings ──
-function openSettings(){
-  document.getElementById('settingsOverlay').className='settings-overlay open';
-}
-function closeSettings(){
-  document.getElementById('settingsOverlay').className='settings-overlay';
-  checkAccountsWarning();
-  renderProgress(); // account names may have changed
-}
-function overlayClick(e){
-  if(e.target===document.getElementById('settingsOverlay')) closeSettings();
+// ── Queue ──
+function updateAddBtn(){
+  const v = document.getElementById('urlInput').value.trim();
+  document.getElementById('addBtn').disabled = !(/^(https?:\/\/|www\.)/i.test(v) && v.length>10);
 }
 
-// ── Accounts ──
-function getAccs(){
-  return ['acc0','acc1','acc2','acc3'].map((id,i)=>
-    document.getElementById(id).value.trim() || ('Account '+(i+1))
-  );
+function addToQueue(){
+  const inp = document.getElementById('urlInput');
+  const url = inp.value.trim();
+  if(!url) return;
+  addUrlsToQueue([url]);
+  inp.value='';
+  updateAddBtn();
 }
 
-function accountsAreSet(){
-  return ['acc0','acc1','acc2','acc3'].every(id=>
-    document.getElementById(id).value.trim().length > 0
-  );
+function removeFromQueue(id){
+  queue = queue.filter(p=>p.id!==id);
+  saveQueue();
+  renderQueue();
+  updateLaunchBtn();
 }
 
-function checkAccountsWarning(){
-  const warn = document.getElementById('noAccountsWarn');
-  const dot  = document.getElementById('settingsDot');
-  const missing = !accountsAreSet();
-  warn.className = 'no-accounts-warn' + (missing ? ' show' : '');
-  dot.className  = 'settings-dot' + (missing ? ' show' : '');
-}
-
-function onAccChange(){
-  ['acc0','acc1','acc2','acc3'].forEach((id,i)=>ls('mh_acc_'+i, document.getElementById(id).value));
-  const confirmed = ls('mh_confirmed')==='true';
-  if(confirmed) return;
-  const allFilled = getAccs().every(a => !a.match(/^Account \d$/));
-  const btn = document.getElementById('confirmNamesBtn');
-  if(btn) btn.style.display = allFilled ? 'inline-flex' : 'none';
-}
-
-function confirmNames(){
-  ls('mh_confirmed','true');
-  const h = document.getElementById('nameHint');
-  h.className = 'name-hint ok';
-  h.textContent = 'Account names saved -- Claude will use these to switch between your Facebook accounts.';
-  toast('Names saved!');
-}
-
-function applyConfirmedState(){
-  if(ls('mh_confirmed')!=='true'){ onAccChange(); return; }
-  const h = document.getElementById('nameHint');
-  h.className = 'name-hint ok';
-  h.textContent = 'Account names saved -- Claude will use these to switch between your Facebook accounts.';
-}
-
-// ── Compose ──
-function onLink(){
-  const v = document.getElementById('link').value.trim();
-  ls('mh_link', v);
-  document.getElementById('linkOk').style.display = (/^(https?:\/\/|www\.)/i.test(v)&&v.length>8)?'block':'none';
-  updateComposeBtn();
-}
-
-function onCaption(){
-  const v = document.getElementById('caption').value;
-  ls('mh_cap', v);
-  const total = v.length + getFooterText().length;
-  const el = document.getElementById('charCount');
-  el.textContent = total.toLocaleString()+' characters';
-  el.className = 'char-count'+(total>CHAR_MAX?' over':total>CHAR_MAX*.8?' warn':'');
-  updateComposeBtn();
-}
-
-function updateComposeBtn(){
-  const hasLink = document.getElementById('link').value.trim().length > 8;
-  const hasCaption = document.getElementById('caption').value.trim().length > 0;
-  document.getElementById('composeNextBtn').disabled = !hasLink || !hasCaption;
-}
-
-function isAffiliate(){ return document.getElementById('affiliateToggle').checked; }
-
-function getFooterText(){
-  if(!isAffiliate()) return '';
-  const custom = document.getElementById('customFooter').value.trim();
-  return custom ? custom+'\n\n'+DISCLOSURE : DISCLOSURE;
-}
-
-function onFooterChange(){
-  const on = isAffiliate();
-  document.getElementById('footerBody').className = 'footer-body'+(on?' visible':'');
-  ls('mh_affiliate', on);
-  ls('mh_custom_footer', document.getElementById('customFooter').value);
-  onCaption();
-}
-
-// ── Step nav ──
-function goStep(n){
-  if(n===1) populatePreview();
-  document.querySelectorAll('.panel').forEach((p,i)=>p.className='panel'+(i===n?' active':''));
-  document.querySelectorAll('.step-pill').forEach((p,i)=>{
-    p.className = 'step-pill'+(i===n?' active':i<n?' done':'');
-    document.getElementById('pnum-'+i).textContent = i<n?'\u2713':(i+1);
+function addUrlsToQueue(urls){
+  let added=0, dupes=0;
+  urls.forEach(url=>{
+    url = url.trim();
+    if(!url || !/^(https?:\/\/|www\.)/i.test(url) || url.length<10) return;
+    if(queue.some(p=>p.url===url)){ dupes++; return; }
+    const statuses={};
+    combos.forEach(c=>{ statuses[c.id]='pending'; });
+    queue.push({ id:'p'+Date.now()+Math.random().toString(36).slice(2,6), url, addedAt:Date.now(), statuses, disabledCombos:{} });
+    added++;
   });
-  window.scrollTo({top:0, behavior:'smooth'});
+  if(added>0){ saveQueue(); renderQueue(); updateLaunchBtn(); }
+  if(added>1) toast(`Added ${added} product${added!==1?'s':''}`+(dupes?` (${dupes} duplicate${dupes!==1?'s':''} skipped)`:''));
+  else if(added===1) toast('Added to queue'+(dupes?' (1 duplicate skipped)':''));
+  else if(dupes>0) toast(`Already in queue`);
 }
 
-// ── Preview ──
-function populatePreview(){
-  const link    = document.getElementById('link').value.trim();
-  const caption = document.getElementById('caption').value.trim();
-  const footer  = getFooterText();
-  const accs    = getAccs();
+// Paste handler — intercepts multi-URL pastes
+document.getElementById('urlInput').addEventListener('paste', function(e){
+  const text = (e.clipboardData||window.clipboardData).getData('text');
+  const lines = text.split(/[\n\r]+/).map(s=>s.trim()).filter(Boolean);
+  if(lines.length > 1){
+    e.preventDefault();
+    addUrlsToQueue(lines);
+    this.value='';
+    updateAddBtn();
+  }
+  // single URL — let it paste normally and user hits Add/Enter
+});
 
-  document.getElementById('prevLink').textContent = link || '(no link)';
-  document.getElementById('prevCaption').textContent = caption || '(no caption)';
+function renderQueue(){
+  const body = document.getElementById('queueBody');
+  const countEl = document.getElementById('queueCount');
+  const progressFooter = document.getElementById('progressFooter');
+  const launchInfo = document.getElementById('launchInfo');
 
-  const footerEl = document.getElementById('prevFooter');
-  if(footer){ footerEl.textContent=footer; footerEl.style.display='block'; }
-  else { footerEl.style.display='none'; }
+  if(queue.length===0){
+    body.innerHTML = `<div class="queue-empty"><div class="queue-empty-icon">🍃</div>Add some Amazon URLs above to get started</div>`;
+    countEl.textContent='';
+    progressFooter.style.display='none';
+    launchInfo.className='launch-info';
+    document.getElementById('clearDoneBtn').className='btn-ghost';
+    document.getElementById('clearAllBtn').className='btn-ghost';
+    checkAllDone();
+    return;
+  }
+  countEl.textContent = queue.length+' product'+(queue.length!==1?'s':'');
+  launchInfo.className='launch-info show';
 
-  const grid = document.getElementById('prevAccounts');
-  grid.innerHTML='';
-  accs.forEach((a,i)=>{
-    const tag=document.createElement('div');
-    tag.className='preview-account-tag';
-    tag.innerHTML='<span class="t-dot" style="background:'+DOTS[i]+'"></span>'+esc(a);
-    grid.appendChild(tag);
+  body.innerHTML = queue.map((p,i)=>{
+    const asin = extractAsin(p.url);
+    const displayLabel = p.name
+      ? p.name
+      : asin ? `ASIN: ${asin}`
+      : p.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,55)+(p.url.length>65?'…':'');
+    const disabled = p.disabledCombos || {};
+    const chips = combos.map(c=>{
+      const isDisabled = !!disabled[c.id];
+      const isPosted = p.statuses[c.id]==='posted';
+      const st = isDisabled ? 'skipped' : (p.statuses[c.id] || 'pending');
+      const label = c.groupName || c.accountName || 'Combo '+(combos.indexOf(c)+1);
+      const title = isDisabled ? `Click to re-enable for this product` : isPosted ? `Posted` : `Click to skip for this product`;
+      const clickable = !isPosted;
+      return `<span class="status-chip ${st}" title="${title}"${clickable?` onclick="toggleCombo('${p.id}','${c.id}')"`:''}><span class="chip-dot"></span>${esc(label.length>18?label.slice(0,16)+'…':label)}</span>`;
+    }).join('');
+    const enabledCombos = combos.filter(c=>!disabled[c.id]);
+    const allPosted = enabledCombos.length>0 && enabledCombos.every(c=>p.statuses[c.id]==='posted');
+    const hasFailed = enabledCombos.some(c=>p.statuses[c.id]==='failed');
+    return `<div class="queue-item no-anim${allPosted?' all-posted':''}" id="qi_${p.id}"
+      draggable="true"
+      ondragstart="dragStart(event,${i})"
+      ondragover="dragOver(event,${i})"
+      ondragleave="dragLeave(event)"
+      ondragend="dragEnd(event)"
+      ondrop="dragDrop(event,${i})">
+      <span class="qi-drag" title="Drag to reorder">⠿</span>
+      <div class="qi-num">${allPosted ? '✓' : i+1}</div>
+      <div class="qi-content">
+        <div class="qi-url"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(displayLabel)}</a></div>
+        <div class="qi-statuses">${chips.length?chips:'<span style="font-size:12px;color:var(--ink-light)">Set up combos in Settings</span>'}</div>
+      </div>
+      ${hasFailed ? `<button class="qi-retry" onclick="launchSingle('${p.id}')" title="Copy prompt to retry failed groups">↺</button>` : ''}
+      <button class="qi-remove" onclick="removeFromQueue('${p.id}')" title="Remove">&#10005;</button>
+    </div>`;
+  }).join('');
+
+  progressFooter.style.display = 'block';
+  updateProgressBar();
+
+  const hasDone = queue.some(p=>Object.values(p.statuses).some(s=>s==='posted'));
+  document.getElementById('clearDoneBtn').className = 'btn-ghost'+(hasDone?' show':'');
+  document.getElementById('clearAllBtn').className = 'btn-ghost'+(queue.length?' show':'');
+  checkAllDone();
+}
+
+function updateProgressBar(){
+  let total=0, done=0;
+  queue.forEach(p=>{
+    const disabled = p.disabledCombos || {};
+    combos.forEach(c=>{
+      if(disabled[c.id]) return;
+      total++;
+      if(p.statuses[c.id]==='posted') done++;
+    });
   });
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = done+' of '+total+' post'+(total!==1?'s':'')+' completed';
 }
 
-// ── Build prompt ──
-function buildPrompt(){
-  const link    = document.getElementById('link').value.trim();
-  const caption = document.getElementById('caption').value.trim();
-  const footer  = getFooterText();
-  const accs    = getAccs();
-  const aff     = isAffiliate();
-  const accountList = accs.map((a,i)=>'  '+(i+1)+'. '+a).join('\n');
+function checkAllDone(){
+  if(queue.length===0){ document.getElementById('allDoneBanner').className='all-done-banner'; return; }
+  const allDone = combos.length>0 && queue.every(p=>{
+    const disabled = p.disabledCombos || {};
+    const active = combos.filter(c=>!disabled[c.id]);
+    return active.length===0 || active.every(c=>p.statuses[c.id]==='posted'||p.statuses[c.id]==='failed');
+  });
+  document.getElementById('allDoneBanner').className = 'all-done-banner'+(allDone?' show':'');
+}
 
-  const captionRules = [
-    '- Each must open differently so posts do not look copy-pasted',
-    '- Warm and personal, like a recommendation from a friend',
-    '- 2-4 sentences',
-    '- End with a call to action (e.g. "Link below!", "Grab it before it sells out!", "Check the link!")',
-    '- Do NOT include the product URL',
-    aff ? '- Write only the creative caption text -- do NOT add any disclosure or affiliate language, the required footer is provided separately below and must be appended verbatim' : null,
-    '- Vary the structure of each opening: use a question for one, a bold statement for another, an exclamation for another, and a personal observation for the last',
-    '- Vary emoji usage: some captions can have 1-2 emojis, others none',
-    '- Vary the CTA phrasing: each account should end differently (e.g. "Link in the comments!", "Check the link below!", "Grab it here!", "You need this — link below!")',
-  ].filter(Boolean).join('\n');
+function clearDone(){
+  queue = queue.filter(p=>{
+    const dis = p.disabledCombos || {};
+    const active = combos.filter(c=>!dis[c.id]);
+    return !(active.length===0 || active.every(c=>p.statuses[c.id]==='posted'));
+  });
+  saveQueue(); renderQueue(); updateLaunchBtn();
+}
 
-  const footerNote = footer
-    ? '\nAfter the creative caption for each account, append the following footer on a new line separated by one blank line.\nCopy it exactly -- do not rephrase, shorten, or change a single word:\n---\n'+footer+'\n---'
-    : '';
+function clearAll(){
+  if(!confirm('Clear all '+(queue.length)+' items from the queue?')) return;
+  queue=[];
+  saveQueue(); renderQueue(); updateLaunchBtn();
+}
 
-  return (
-'PHASE 1 -- WRITE CAPTIONS\n\n'+
-'I need to post to my 4 Facebook accounts. First, write 4 caption variations from my rough notes below.\n\n'+
-'My rough caption / product notes:\n'+caption+'\n\n'+
-'Product link (context only -- do not include in captions):\n'+link+'\n\n'+
-'My 4 accounts (one caption each, in this order):\n'+accountList+'\n\n'+
-'Caption requirements:\n'+captionRules+
-footerNote+'\n\n'+
-'Show the 4 captions clearly labeled with each account name.\n'+
-'Then STOP and wait for me to review.\n'+
-'When I say "post them" (or "looks good" or "go ahead"), move to Phase 2.\n'+
-'If I ask for edits, update and wait again.\n\n'+
-'------------------------------------------------------------\n\n'+
-'PHASE 2 -- POST TO ALL 4 ACCOUNTS\n'+
-'(Only start after I approve the captions above)\n\n'+
-'First, navigate to https://www.facebook.com and make sure you are logged in.\n'+
-'Post to each account one at a time using the approved captions.\n\n'+
-'LINK TO INCLUDE ON EVERY POST:\n'+link+'\n\n'+
-'MY 4 ACCOUNTS (in this order):\n'+accountList+'\n\n'+
-'FOR EACH ACCOUNT:\n'+
-'1. Confirm the correct account is active -- read the profile name top-right. Switch if needed.\n'+
-'2. Scroll to the top of the page.\n'+
-'3. Click "What\'s on your mind?" to open the composer. If a dialog opens, click inside the text area.\n'+
-'4. Type that account\'s approved caption exactly, including the footer at the end.'+(footer ? ' The footer must be typed word-for-word as approved -- do not rephrase, shorten, or change it.\n' : '\n')+
-'5. Click at the end of the caption text, press Shift+Enter to create a new line, then paste the LINK.\n'+
-'6. Wait up to 15 seconds for a link preview to load (leave it if it appears).\n'+
-'7. Click the blue Post button.\n'+
-'8. Wait for the page to confirm the post went through.\n'+
-'9. Say "Posted to [account name]" then move to the next account.\n\n'+
-'HOW TO SWITCH ACCOUNTS:\n'+
-'- Click the profile picture top-right on Facebook\n'+
-'- Find the next account name in the dropdown and click it\n'+
-'- Wait for the full page reload\n'+
-'- If a confirmation dialog appears, click Continue or OK\n'+
-'- If the account is missing, stop and tell me\n\n'+
-'IF ANYTHING GOES WRONG:\n'+
-'- CAPTCHA or human verification: stop immediately and tell me\n'+
-'- Unexpected popup: describe it before clicking anything\n'+
-'- Post composer won\'t open: refresh once, then try again\n\n'+
-'Say "All done! Posted to all 4 accounts." when finished.'
-  );
+function updateLaunchBtn(){
+  const ready = queue.length>0 && combos.length>0;
+  const btn = document.getElementById('launchBtn');
+  btn.disabled = !ready;
+  const anyPosted = queue.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
+  const pendingCount = queue.filter(p=>{
+    const dis = p.disabledCombos || {};
+    return combos.some(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
+  }).length;
+  if(anyPosted && pendingCount > 0){
+    btn.innerHTML = '&#10022; Resume Batch';
+  } else {
+    btn.innerHTML = '&#10022; Generate &amp; Copy Prompt';
+  }
+}
+
+function toggleCombo(productId, comboId){
+  if(dragSrcIdx !== null) return; // suppress clicks during drag
+  const p = queue.find(x=>x.id===productId);
+  if(!p) return;
+  if(!p.disabledCombos) p.disabledCombos={};
+  if(p.disabledCombos[comboId]) delete p.disabledCombos[comboId];
+  else p.disabledCombos[comboId]=true;
+  saveQueue();
+  renderQueue();
+  updateLaunchBtn();
+}
+
+// ── Drag to reorder ──
+let dragSrcIdx = null;
+function dragStart(e, idx){
+  dragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+function dragOver(e, idx){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.queue-item').forEach(el=>el.classList.remove('drag-over'));
+  if(idx !== dragSrcIdx) e.currentTarget.classList.add('drag-over');
+}
+function dragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function dragEnd(e){ e.currentTarget.classList.remove('dragging','drag-over'); dragSrcIdx = null; }
+function dragDrop(e, idx){
+  e.preventDefault();
+  document.querySelectorAll('.queue-item').forEach(el=>el.classList.remove('drag-over','dragging'));
+  if(dragSrcIdx===null || dragSrcIdx===idx) return;
+  const moved = queue.splice(dragSrcIdx, 1)[0];
+  queue.splice(idx, 0, moved);
+  dragSrcIdx = null;
+  saveQueue();
+  renderQueue();
+}
+
+function checkWarning(){
+  const missing = combos.length===0;
+  document.getElementById('noCombosWarn').className='no-combos-warn'+(missing?' show':'');
+  document.getElementById('settingsDot').className='settings-dot'+(missing?' show':'');
+}
+
+// ── Build Prompt ──
+function buildPrompt(items){
+  if(!items || items.length===0) return null;
+  const comboList = combos.map((c,i)=>`  ${i+1}. Account: "${c.accountName.trim()}" → Group: "${(c.groupName||'(see URL)').trim()}" (URL: ${c.groupUrl.trim()})`).join('\n');
+  const productList = items.map((p,i)=>`  Product ${i+1} [ID: ${p.id}]: ${p.url}`).join('\n');
+  const totalPosts = items.reduce((sum,p)=>{ const dis=p.disabledCombos||{}; return sum+combos.filter(c=>!dis[c.id]).length; },0);
+
+  const perProductSteps = items.map((p,i)=>{
+    const disabled = p.disabledCombos || {};
+    const activeCombos = combos.filter(c=>!disabled[c.id]);
+    if(activeCombos.length===0) return `\n---\nPRODUCT ${i+1} [ID: ${p.id}]\nURL: ${p.url}\n  (all combos skipped for this product)\n---`;
+
+    const templateGroups = {};
+    activeCombos.forEach(c=>{
+      const tmpl = c.template || 'Default Template';
+      if(!templateGroups[tmpl]) templateGroups[tmpl]=[];
+      templateGroups[tmpl].push(c);
+    });
+
+    const templateBlocks = Object.entries(templateGroups).map(([tmpl, tCombos], ti)=>{
+      const comboSteps = tCombos.map((c,ci)=>`
+      COMBO — Account: "${c.accountName.trim()}" → "${(c.groupName||c.groupUrl).trim()}" [comboId: ${c.id}]
+        a. Execute on dashboard tab: window.setWorking('${p.id}','${c.id}')
+        b. On facebook.com, confirm active account is "${c.accountName.trim()}" — switch if needed
+        c. Navigate to: ${c.groupUrl.trim()}
+        d. Wait for group page to fully load
+        e. Click "Write something..." or "Create post" to open the composer
+        f. Click inside the text area and paste (Ctrl+V) — the Chickadeasy caption for template "${tmpl}"
+        g. Click the blue Post button and wait for confirmation
+        h. On success: window.updateStatus('${p.id}','${c.id}','posted')
+           On failure: window.updateStatus('${p.id}','${c.id}','failed') — describe error, continue`).join('\n');
+
+      return `
+  TEMPLATE GROUP ${ti+1}: "${tmpl}" → used by ${tCombos.length} combo(s)
+
+    STEP — Generate caption with Chickadeasy (template: "${tmpl}"):
+      a. Navigate to: ${p.url}
+      b. Wait up to 20 seconds for the Chickadeasy SiteStripe bar to appear at the top of the page (chickadee bird icon)
+      c. While waiting, grab the product title from this Amazon tab: read the text of #productTitle element (or fall back to the page <title> tag before the first colon). Then switch to the dashboard tab and execute:
+         window.setProductName('${p.id}', 'THE TITLE YOU JUST READ')
+         Then switch back to the Amazon tab.
+      d. In the SiteStripe template dropdown, select "${tmpl}" — match the name exactly
+      e. Click the chickadee bird icon — the caption is now copied to your clipboard
+      f. Navigate to https://www.facebook.com (keep the caption in clipboard — do not copy anything else)
+
+    STEP — Post to all combos using this caption:
+${comboSteps}`;
+    }).join('\n\n  ---\n');
+
+    return `
+---
+PRODUCT ${i+1} [ID: ${p.id}]
+URL: ${p.url}
+${templateBlocks}
+
+  After all combos for this product: execute window.markProductDone('${p.id}')
+---`;
+  }).join('\n');
+
+  // Build status snapshot across ALL queue items (not just items in this batch)
+  const isResume = queue.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
+  const statusSnapshot = queue.map((p,i)=>{
+    const dis = p.disabledCombos || {};
+    const label = p.name || extractAsin(p.url) || `Product ${i+1}`;
+    const comboSummary = combos.map(c=>{
+      if(dis[c.id]) return `    ${c.groupName||c.accountName}: skipped`;
+      const st = p.statuses[c.id] || 'pending';
+      return `    ${c.groupName||c.accountName}: ${st}`;
+    }).join('\n');
+    return `  ${label} [${p.id}]:\n${comboSummary}`;
+  }).join('\n');
+
+  return `AUTOMATED FACEBOOK POSTING — ${items.length} PRODUCT(S) × ${combos.length} COMBO(S)
+
+Generated by Mom's Post Helper. Follow every step precisely. Do not skip steps.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${isResume ? 'RESUMING BATCH — STATUS SNAPSHOT' : 'STATUS SNAPSHOT'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${isResume ? 'This is a resumed batch. Some posts are already done — do NOT re-post them. The steps below only include work that still needs to happen. Use this snapshot to orient yourself:\n' : ''}${statusSnapshot}
+${isResume ? '\nOnly process steps listed below. Anything marked "posted" above is complete — skip it.' : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPORTANT: THE DASHBOARD TAB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Keep the Mom's Post Helper tab open the entire time. After each post, you will execute JavaScript on that tab to update the dashboard. The tab URL contains "claude.ai" or is a local HTML file — identify it now before you begin.
+
+To update the dashboard, execute JavaScript like this on the Mom's Post Helper tab:
+  window.updateStatus('PRODUCT_ID', 'COMBO_ID', 'posted')   ← after successful post
+  window.updateStatus('PRODUCT_ID', 'COMBO_ID', 'failed')   ← if a post fails
+  window.setWorking('PRODUCT_ID', 'COMBO_ID')                ← while actively working on a combo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUEUE (${queue.length} products)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${productList}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMBOS (${combos.length} account + group pairs)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${comboList}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BEGIN — PROCESS EACH PRODUCT IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${perProductSteps}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO SWITCH FACEBOOK ACCOUNTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Click the profile picture / avatar at the top-right of facebook.com
+- In the dropdown, find the account name and click it
+- Wait for the full page reload to complete
+- Verify the new account name appears top-right
+- If the account is missing from the dropdown: mark that combo as failed, inform the user, continue
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IF ANYTHING GOES WRONG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- CAPTCHA / human verification → STOP immediately and notify the user
+- Unexpected popup or dialog → describe it before clicking anything
+- Chickadeasy SiteStripe doesn't appear → scroll to top of page, wait 20s, refresh once, try again
+- Post composer won't open → refresh the group page once, try again
+- Group not found or access denied → mark combo as failed, continue
+- Any other error → mark the specific combo as failed, continue with the next one
+
+Say "All done! Posted ${totalPosts} post${totalPosts!==1?'s':''} across ${items.length} product${items.length!==1?'s':''} and ${combos.length} account${combos.length!==1?'s':''}." when fully finished.`;
 }
 
 // ── Launch ──
-async function generateAndLaunch(){
-  lastPrompt = buildPrompt();
-  await doCopy(lastPrompt);
-  doneSet.clear();
-  renderProgress();
-  goStep(2);
-  toast('Prompt copied -- paste it into Claude!');
+async function launch(){
+  const invalid = getInvalidCombos();
+  if(invalid.length){
+    toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
+    return;
+  }
+  const prompt = buildPrompt(queue.filter(p=>{
+    const dis = p.disabledCombos || {};
+    return combos.some(c=>!dis[c.id] && (!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
+  }));
+  if(!prompt) { toast('Nothing left to post!'); return; }
+  const ok = await doCopy(prompt);
+  if(ok) toast('Prompt copied — paste into Claude sidebar!');
 }
 
-async function copyAgain(){
-  if(!lastPrompt) return;
-  await doCopy(lastPrompt);
-  toast('Copied again!');
+async function launchSingle(productId){
+  const invalid = getInvalidCombos();
+  if(invalid.length){
+    toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
+    return;
+  }
+  const p = queue.find(x=>x.id===productId);
+  if(!p) return;
+  const prompt = buildPrompt([p]);
+  const ok = await doCopy(prompt);
+  if(ok) toast('Single-product prompt copied!');
 }
 
 async function doCopy(text){
-  // Try modern clipboard API first (works on https with user gesture)
   if(navigator.clipboard && window.isSecureContext){
-    try{ await navigator.clipboard.writeText(text); return true; }
-    catch(e){ console.warn('Clipboard API failed:', e); }
+    try{ await navigator.clipboard.writeText(text); return true; }catch(e){}
   }
-  // execCommand fallback - textarea must be visible + focused to work
   try{
     const ta=document.createElement('textarea');
     ta.value=text;
-    ta.style.cssText='position:fixed;top:10px;left:10px;width:1px;height:1px;opacity:0.01;border:none;outline:none;resize:none;';
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    const ok = document.execCommand('copy');
+    ta.style.cssText='position:fixed;top:10px;left:10px;width:1px;height:1px;opacity:0.01;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    const ok=document.execCommand('copy');
     document.body.removeChild(ta);
     if(ok) return true;
-  }catch(e){ console.warn('execCommand failed:', e); }
-  // Last resort: show prompt so user can copy manually
+  }catch(e){}
   showCopyFallback(text);
   return false;
 }
 
 function showCopyFallback(text){
-  // Remove any existing fallback
-  const existing = document.getElementById('copyFallback');
-  if(existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'copyFallback';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(28,16,8,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;';
-  overlay.innerHTML = `
-    <div style="background:var(--cream);border-radius:20px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(28,16,8,.3);width:100%;max-width:520px;overflow:hidden;">
-      <div style="padding:18px 22px;border-bottom:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;">Copy this prompt</span>
-        <button onclick="document.getElementById('copyFallback').remove()" style="width:30px;height:30px;border-radius:7px;background:var(--cream-dark);border:none;cursor:pointer;font-size:14px;">✕</button>
-      </div>
-      <div style="padding:16px 22px;">
-        <p style="font-size:13px;color:var(--ink-light);margin-bottom:10px;">Your browser blocked auto-copy. Select all the text below and copy it manually (Ctrl+A then Ctrl+C):</p>
-        <textarea id="copyFallbackText" style="width:100%;height:140px;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;font-family:monospace;color:var(--ink);background:var(--cream);resize:none;outline:none;" readonly>${text}</textarea>
-        <button onclick="document.getElementById('copyFallbackText').select();document.execCommand('copy');document.getElementById('copyFallback').remove();document.querySelector('.toast-wrap') && (() => { const t=document.createElement('div');t.className='toast';t.textContent='Copied!';document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2800); })()" 
-          style="margin-top:10px;width:100%;padding:12px;background:var(--ink);color:white;border:none;border-radius:10px;font-family:'Fraunces',serif;font-size:17px;font-weight:600;cursor:pointer;">
-          Select &amp; Copy
-        </button>
-      </div>
+  const el=document.createElement('div');
+  el.className='copy-fallback-overlay';
+  el.innerHTML=`<div class="copy-fallback-sheet">
+    <div class="copy-fallback-header"><span>Copy this prompt</span><button class="copy-fallback-close" onclick="this.closest('.copy-fallback-overlay').remove()">&#10005;</button></div>
+    <div class="copy-fallback-body">
+      <p>Browser blocked auto-copy. Select all below and copy manually (Ctrl+A → Ctrl+C):</p>
+      <textarea class="copy-fallback-ta" id="cfta" readonly>${text}</textarea>
+      <button class="copy-fallback-go" onclick="document.getElementById('cfta').select();document.execCommand('copy');this.closest('.copy-fallback-overlay').remove();toast('Copied!')">Select &amp; Copy</button>
     </div>
-  `;
-  document.body.appendChild(overlay);
-  // Auto-select the textarea
-  setTimeout(()=>{ const ta=document.getElementById('copyFallbackText'); if(ta){ta.focus();ta.select();} }, 100);
+  </div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ const ta=document.getElementById('cfta'); if(ta){ta.focus();ta.select();} },100);
 }
 
-// ── Progress ──
-function renderProgress(){
-  const accs = getAccs();
-  const grid = document.getElementById('progressGrid');
-  grid.innerHTML='';
-  accs.forEach((a,i)=>{
-    const done = doneSet.has(i);
-    const div = document.createElement('div');
-    div.className = 'prog-item'+(done?' done':'');
-    div.innerHTML = '<div class="prog-icon">'+(done?'\u2705':'\u25cb')+'</div><div class="prog-name">'+esc(a)+'</div>';
-    div.onclick = ()=>{
-      doneSet.has(i)?doneSet.delete(i):doneSet.add(i);
-      renderProgress();
-      if(doneSet.size===4) setTimeout(()=>toast('All 4 accounts posted!'),100);
-    };
-    grid.appendChild(div);
+// ── Info popover ──
+function toggleInfo(e){
+  e.stopPropagation();
+  const p = document.getElementById('infoPopover');
+  p.classList.toggle('open');
+}
+document.addEventListener('click', ()=>{
+  document.getElementById('infoPopover').classList.remove('open');
+});
+
+// ── Settings ──
+function openSettings(){ document.getElementById('settingsOverlay').className='settings-overlay open'; }
+function closeSettings(){
+  document.getElementById('settingsOverlay').className='settings-overlay';
+  const validIds = new Set(combos.map(c=>c.id));
+  queue.forEach(p=>{
+    // add new combos
+    combos.forEach(c=>{ if(!(c.id in p.statuses)) p.statuses[c.id]='pending'; });
+    // prune deleted combos
+    Object.keys(p.statuses).forEach(id=>{ if(!validIds.has(id)) delete p.statuses[id]; });
+    if(p.disabledCombos) Object.keys(p.disabledCombos).forEach(id=>{ if(!validIds.has(id)) delete p.disabledCombos[id]; });
   });
-  document.getElementById('progressCount').textContent = doneSet.size+' of 4 posted';
-  document.getElementById('allDoneBadge').className = 'all-done-badge'+(doneSet.size===4?' show':'');
+  saveQueue(); saveCombos();
+  renderQueue(); checkWarning(); updateLaunchBtn();
 }
+function overlayClick(e){ if(e.target===document.getElementById('settingsOverlay')) closeSettings(); }
 
-function resetProgress(){ doneSet.clear(); renderProgress(); }
+// ── Public API for Claude ──
+window.setProductName = function(productId, name){
+  const p = queue.find(x=>x.id===productId);
+  if(!p || !name) return;
+  p.name = String(name).trim().slice(0, 80);
+  saveQueue();
+  renderQueue();
+};
 
-function startOver(){
-  doneSet.clear(); lastPrompt='';
-  document.getElementById('link').value='';
-  document.getElementById('caption').value='';
-  document.getElementById('customFooter').value='';
-  document.getElementById('affiliateToggle').checked=false;
-  document.getElementById('footerBody').className='footer-body';
-  ld('mh_link'); ld('mh_cap'); ld('mh_custom_footer'); ld('mh_affiliate');
-  onLink(); onCaption();
-  goStep(0);
-}
+window.updateStatus = function(productId, comboId, status){
+  const p = queue.find(x=>x.id===productId);
+  if(!p){ console.warn('updateStatus: product not found', productId); return; }
+  if(comboId) p.statuses[comboId] = status;
+  saveQueue();
+  renderQueue();
+  updateLaunchBtn();
+};
 
+window.setWorking = function(productId, comboId){
+  window.updateStatus(productId, comboId, 'working');
+};
+
+window.markProductDone = function(productId){
+  renderQueue();
+  updateLaunchBtn();
+};
+
+// ── Toast ──
 function toast(msg){
   const wrap=document.getElementById('toasts');
   const el=document.createElement('div');
