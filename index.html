@@ -464,7 +464,7 @@
   <div class="settings-sheet">
     <div class="settings-header">
       <span class="settings-title">Settings</span>
-      <button class="settings-close" onclick="closeSettings()">&#10005;</button>
+      <button class="settings-close" onclick="forceCloseSettings()">&#10005;</button>
     </div>
     <div class="settings-body">
       <div class="settings-section-label">Facebook Account + Group Combos</div>
@@ -540,27 +540,31 @@ function sanitizeGroupUrl(id){
   if(!c) return;
   let value = c.groupUrl.trim();
   if(!value) return;
-  // Block dangerous protocols
-  if(/^(javascript|data|vbscript):/i.test(value)){
-    toast('⚠️ Invalid URL — must be a Facebook group URL');
+
+  const clearField = (msg) => {
+    toast(msg);
     c.groupUrl = '';
+    saveCombos();
     const row = document.getElementById('crow_'+id);
     if(row){ const inp = row.querySelectorAll('input')[2]; if(inp) inp.value=''; }
-    saveCombos(); return;
+  };
+
+  // Block dangerous protocols
+  if(/^(javascript|data|vbscript):/i.test(value)){
+    clearField('⚠️ Invalid URL — must be a Facebook group URL'); return;
   }
   // Auto-prepend https:// only if no protocol present
   if(!/^https?:\/\//i.test(value)){
     value = 'https://' + value;
   }
-  // Validate it looks like a Facebook URL
+  // Validate it's a Facebook URL — reject non-facebook, don't just warn
   try{
     const host = new URL(value).hostname.replace(/^www\./,'');
     if(!/(facebook\.com|fb\.com)$/.test(host)){
-      toast('⚠️ Group URL should be a facebook.com URL');
+      clearField('⚠️ Must be a facebook.com URL (e.g. https://facebook.com/groups/...)'); return;
     }
   }catch(e){
-    toast('⚠️ Invalid URL format');
-    return;
+    clearField('⚠️ Invalid URL format'); return;
   }
   c.groupUrl = value;
   saveCombos();
@@ -612,25 +616,41 @@ function updateAddBtn(){
   const v = document.getElementById('urlInput').value.trim();
   const valid = /^(https?:\/\/|www\.)/i.test(v) && v.length>10;
   const btn = document.getElementById('addBtn');
-  // Never truly disable — keep clickable so addToQueue() can show validation feedback
   btn.style.opacity = valid ? '' : '0.5';
   btn.style.cursor = valid ? '' : 'default';
 }
 
+function setUrlError(msg){
+  let el = document.getElementById('urlError');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'urlError';
+    el.style.cssText = 'font-size:12px;color:var(--red);margin-top:6px;font-weight:500;';
+    document.getElementById('urlInput').parentNode.parentNode.appendChild(el);
+  }
+  el.textContent = msg;
+  if(msg) setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 3000);
+}
+
 function shakeInput(){
   const inp = document.getElementById('urlInput');
-  inp.style.transition='none';
-  inp.style.borderColor='var(--red)';
-  inp.style.boxShadow='0 0 0 3.5px rgba(196,48,48,.15)';
-  setTimeout(()=>{ inp.style.borderColor=''; inp.style.boxShadow=''; inp.style.transition=''; }, 700);
+  inp.style.borderColor = 'var(--red)';
+  inp.style.boxShadow = '0 0 0 3.5px rgba(196,48,48,.15)';
+  inp.addEventListener('input', function clear(){
+    inp.style.borderColor=''; inp.style.boxShadow='';
+    inp.removeEventListener('input', clear);
+  }, {once:true});
+  setTimeout(()=>{ inp.style.borderColor=''; inp.style.boxShadow=''; }, 3000);
 }
 
 function addToQueue(){
   const inp = document.getElementById('urlInput');
   const url = inp.value.trim();
-  if(!url){ shakeInput(); toast('Paste an Amazon URL first'); return; }
-  if(!/^(https?:\/\/|www\.)/i.test(url)){ shakeInput(); toast('⚠️ Needs a full URL (https://...)'); return; }
-  if(!isAmazonUrl(url)){ shakeInput(); toast('⚠️ Only Amazon product URLs are supported'); return; }
+  if(!url){ shakeInput(); setUrlError('Paste an Amazon product URL first'); return; }
+  if(!/^(https?:\/\/|www\.)/i.test(url)){ shakeInput(); setUrlError('URL must start with https://'); return; }
+  if(!isAmazonUrl(url)){ shakeInput(); setUrlError('Only Amazon product URLs are supported'); return; }
+  if(!extractAsin(url)){ shakeInput(); setUrlError('No product ASIN found — paste a direct product URL'); return; }
+  setUrlError('');
   addUrlsToQueue([url]);
   inp.value='';
   updateAddBtn();
@@ -654,15 +674,16 @@ function isAmazonUrl(url){
 }
 
 function addUrlsToQueue(urls){
-  let added=0, dupes=0, nonAmazon=0;
+  let added=0, dupes=0, nonAmazon=0, noAsin=0;
   urls.forEach(url=>{
     url = url.trim();
     if(!url || !/^(https?:\/\/|www\.)/i.test(url) || url.length<10) return;
     if(!isAmazonUrl(url)){ nonAmazon++; return; }
-    // ASIN-level dedup
+    // Require a valid ASIN
     const asin = extractAsin(url);
-    if(asin && queue.some(p=>extractAsin(p.url)===asin)){ dupes++; return; }
-    if(!asin && queue.some(p=>p.url===url)){ dupes++; return; }
+    if(!asin){ noAsin++; return; }
+    // ASIN-level dedup
+    if(queue.some(p=>extractAsin(p.url)===asin)){ dupes++; return; }
     const statuses={};
     combos.forEach(c=>{ statuses[c.id]='pending'; });
     queue.push({ id:'p'+Date.now()+Math.random().toString(36).slice(2,6), url, addedAt:Date.now(), statuses, disabledCombos:{} });
@@ -672,6 +693,7 @@ function addUrlsToQueue(urls){
   if(added>1) toast(`Added ${added} product${added!==1?'s':''}`+(dupes?` (${dupes} duplicate${dupes!==1?'s':''} skipped)`:''));
   else if(added===1) toast('Added to queue'+(dupes?' (1 duplicate skipped)':''));
   else if(dupes>0) toast('Already in queue — duplicate skipped');
+  else if(noAsin>0) toast('⚠️ No product ASIN found — paste a direct product URL');
   else if(nonAmazon>0) toast('⚠️ Only Amazon product URLs are supported');
 }
 
@@ -739,7 +761,7 @@ function renderQueue(){
         <div class="qi-url"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(displayLabel)}</a></div>
         <div class="qi-statuses">${chips.length?chips:'<span style="font-size:12px;color:var(--ink-light)">Set up combos in Settings</span>'}</div>
       </div>
-      ${hasFailed ? `<button class="qi-retry" onclick="launchSingle('${p.id}')" title="Copy prompt to retry failed groups">↺</button>` : ''}
+      ${hasFailed ? `<button class="qi-retry" onclick="launchSingle('${p.id}',this)" title="Copy prompt to retry failed groups">↺</button>` : ''}
       <button class="qi-remove" onclick="removeFromQueue('${p.id}')" title="Remove">&#10005;</button>
     </div>`;
   }).join('');
@@ -1018,25 +1040,36 @@ async function launch(){
   const btn = document.getElementById('launchBtn');
   const orig = btn.innerHTML;
   const origBg = btn.style.background;
-  btn.disabled = true;
+  // Use style not disabled attr — disabled suppresses paint in some browsers
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.8';
   btn.innerHTML = '⏳ Copying…';
-  // Small delay so browser paints the loading state before clipboard call
-  await new Promise(r=>setTimeout(r,40));
+  // Yield to browser paint cycle before clipboard call
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
   const ok = await doCopy(prompt);
   if(ok){
     btn.innerHTML = '✓ Copied!';
     btn.style.background = 'linear-gradient(160deg, #2e6247 0%, #1e3d2c 60%)';
+    btn.style.opacity = '';
     toast('Prompt copied — paste into Claude sidebar!');
-    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=origBg; btn.disabled=false; updateLaunchBtn(); }, 2500);
+    setTimeout(()=>{
+      btn.innerHTML=orig; btn.style.background=origBg;
+      btn.style.pointerEvents=''; btn.style.opacity='';
+      updateLaunchBtn();
+    }, 2500);
   } else {
-    // Fallback modal is already showing — give button feedback too
     btn.innerHTML = '📋 See popup to copy';
     btn.style.background = 'linear-gradient(160deg, #7a3d14 0%, #5a2c0e 60%)';
-    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=origBg; btn.disabled=false; updateLaunchBtn(); }, 4000);
+    btn.style.opacity = '';
+    setTimeout(()=>{
+      btn.innerHTML=orig; btn.style.background=origBg;
+      btn.style.pointerEvents=''; btn.style.opacity='';
+      updateLaunchBtn();
+    }, 4000);
   }
 }
 
-async function launchSingle(productId){
+async function launchSingle(productId, btnEl){
   const invalid = getInvalidCombos();
   if(invalid.length){
     toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
@@ -1045,8 +1078,24 @@ async function launchSingle(productId){
   const p = queue.find(x=>x.id===productId);
   if(!p) return;
   const prompt = buildPrompt([p]);
-  const ok = await doCopy(prompt);
-  if(ok) toast('Single-product prompt copied!');
+  if(btnEl){
+    const orig = btnEl.textContent;
+    btnEl.style.pointerEvents='none';
+    btnEl.textContent='…';
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const ok = await doCopy(prompt);
+    if(ok){
+      btnEl.textContent='✓';
+      toast('Single-product prompt copied!');
+      setTimeout(()=>{ btnEl.textContent=orig; btnEl.style.pointerEvents=''; }, 2000);
+    } else {
+      btnEl.textContent=orig; btnEl.style.pointerEvents='';
+    }
+  } else {
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const ok = await doCopy(prompt);
+    if(ok) toast('Single-product prompt copied!');
+  }
 }
 
 async function doCopy(text){
@@ -1101,33 +1150,9 @@ document.addEventListener('click', ()=>{
 
 // ── Settings ──
 function openSettings(){ document.getElementById('settingsOverlay').className='settings-overlay open'; }
-function closeSettings(){
-  // Highlight incomplete combo fields
-  const incomplete = combos.filter(c=>!c.accountName.trim() || !c.groupUrl.trim() || !(c.template||'').trim());
-  if(incomplete.length && combos.length > 0){
-    incomplete.forEach(c=>{
-      const row = document.getElementById('crow_'+c.id);
-      if(!row) return;
-      const inputs = row.querySelectorAll('input');
-      // inputs: [accountName, groupName, groupUrl, template]
-      [
-        {idx:0, val:c.accountName},
-        {idx:2, val:c.groupUrl},
-        {idx:3, val:c.template||''},
-      ].forEach(({idx, val})=>{
-        if(!val.trim() && inputs[idx]){
-          inputs[idx].style.borderColor='var(--red)';
-          inputs[idx].style.boxShadow='0 0 0 3px rgba(196,48,48,.15)';
-          inputs[idx].addEventListener('input', function fix(){
-            this.style.borderColor=''; this.style.boxShadow='';
-            this.removeEventListener('input', fix);
-          });
-        }
-      });
-    });
-    toast(`⚠️ ${incomplete.length} combo(s) have empty required fields (highlighted in red)`);
-    return; // Don't close — keep open so user can fix
-  }
+
+function forceCloseSettings(){
+  // Always closes — used by ESC, X button, and click-outside
   document.getElementById('settingsOverlay').className='settings-overlay';
   const validIds = new Set(combos.map(c=>c.id));
   queue.forEach(p=>{
@@ -1138,9 +1163,36 @@ function closeSettings(){
   saveQueue(); saveCombos();
   renderQueue(); checkWarning(); updateLaunchBtn();
 }
-function overlayClick(e){ if(e.target===document.getElementById('settingsOverlay')) closeSettings(); }
-// ESC closes settings
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSettings(); });
+
+function closeSettings(){
+  // Validates before closing — used by the Done button only
+  const incomplete = combos.filter(c=>!c.accountName.trim() || !c.groupUrl.trim() || !(c.template||'').trim());
+  if(incomplete.length && combos.length > 0){
+    incomplete.forEach(c=>{
+      const row = document.getElementById('crow_'+c.id);
+      if(!row) return;
+      const inputs = row.querySelectorAll('input');
+      // inputs: [accountName, groupName, groupUrl, template]
+      [{idx:0, val:c.accountName},{idx:2, val:c.groupUrl},{idx:3, val:c.template||''}]
+        .forEach(({idx, val})=>{
+          if(!val.trim() && inputs[idx]){
+            inputs[idx].style.borderColor='var(--red)';
+            inputs[idx].style.boxShadow='0 0 0 3px rgba(196,48,48,.15)';
+            inputs[idx].addEventListener('input', function fix(){
+              this.style.borderColor=''; this.style.boxShadow='';
+              this.removeEventListener('input', fix);
+            });
+          }
+        });
+    });
+    toast(`⚠️ ${incomplete.length} combo(s) have empty required fields (highlighted in red)`);
+    return; // Don't close — keep open so user can fix
+  }
+  forceCloseSettings();
+}
+
+function overlayClick(e){ if(e.target===document.getElementById('settingsOverlay')) forceCloseSettings(); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') forceCloseSettings(); });
 
 // ── Public API for Claude ──
 window.setProductName = function(productId, name){
