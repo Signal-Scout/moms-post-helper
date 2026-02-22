@@ -380,6 +380,95 @@
   .copy-fallback-body p { font-size:13px; color:var(--ink-light); margin-bottom:10px; }
   .copy-fallback-ta { width:100%; height:140px; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; font-family:monospace; color:var(--ink); background:var(--cream); resize:none; outline:none; }
   .copy-fallback-go { margin-top:10px; width:100%; padding:12px; background:var(--ink); color:white; border:none; border-radius:10px; font-family:'Fraunces',serif; font-size:17px; font-weight:600; cursor:pointer; }
+
+  /* Blurbs section */
+  .settings-divider { border:none; border-top:1px solid var(--border); margin:22px 0; }
+  .blurb-input-row { display:flex; gap:8px; margin-bottom:12px; }
+  .blurb-input-row input {
+    flex:1; border:1.5px solid var(--border); border-radius:8px; padding:8px 11px;
+    font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink); background:var(--cream);
+    outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  .blurb-input-row input:focus { border-color:var(--terra); box-shadow:0 0 0 3px rgba(179,97,45,.1); background:white; }
+  .blurb-input-row input::placeholder { color:#c0a88a; }
+  .blurb-add-btn {
+    padding:8px 14px; background:var(--terra-light); border:1.5px solid var(--terra);
+    color:var(--terra-dark); border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;
+    transition:background .15s;
+  }
+  .blurb-add-btn:hover { background:var(--terra); color:white; }
+  .blurb-list { display:flex; flex-wrap:wrap; gap:7px; min-height:10px; }
+  .blurb-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--gold-light); border:1.5px solid #e8c87a; color:var(--ink-mid);
+    border-radius:100px; padding:5px 10px 5px 13px;
+    font-size:12px; font-weight:500;
+  }
+  .blurb-pill-remove {
+    width:16px; height:16px; border-radius:50%; background:rgba(192,128,16,.2);
+    border:none; cursor:pointer; font-size:10px; color:var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s; line-height:1; padding:0;
+  }
+  .blurb-pill-remove:hover { background:var(--gold); color:white; }
+  .blurb-empty { font-size:12px; color:var(--ink-light); font-style:italic; }
+
+  .pacing-hint { font-size:11px; color:var(--ink-light); margin-top:8px; line-height:1.5; }
+
+  /* Pace preset cards */
+  .pace-cards { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:4px; }
+  .pace-card {
+    border:2px solid var(--border); border-radius:14px; padding:14px 12px 12px;
+    cursor:pointer; background:var(--cream); transition:border-color .18s, background .18s, box-shadow .18s;
+    text-align:center; user-select:none;
+  }
+  .pace-card:hover { border-color:var(--sage); background:white; }
+  .pace-card.selected {
+    border-color:var(--sage); background:var(--sage-light);
+    box-shadow:0 0 0 3px rgba(78,143,106,.13);
+  }
+  .pace-card-emoji { font-size:22px; margin-bottom:6px; line-height:1; }
+  .pace-card-label { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+  .pace-card-desc { font-size:10.5px; color:var(--ink-light); line-height:1.4; margin-bottom:8px; min-height:28px; }
+  .pace-card-stats { font-size:10.5px; font-weight:600; color:var(--sage-dark); background:rgba(78,143,106,.1); border-radius:99px; padding:3px 8px; display:inline-block; line-height:1.5; }
+
+  /* Warmup scheduler */
+  .warmup-toggle-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .warmup-toggle-label { font-size:13px; font-weight:500; color:var(--ink); }
+  .warmup-toggle-sub { font-size:11px; color:var(--ink-light); margin-top:1px; }
+  .toggle-switch { position:relative; width:40px; height:22px; flex-shrink:0; }
+  .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+  .toggle-track {
+    position:absolute; inset:0; border-radius:99px;
+    background:var(--border); cursor:pointer; transition:background .2s;
+  }
+  .toggle-track::after {
+    content:''; position:absolute; top:3px; left:3px;
+    width:16px; height:16px; border-radius:50%; background:white;
+    box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s;
+  }
+  .toggle-switch input:checked + .toggle-track { background:var(--sage); }
+  .toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
+  .warmup-body { display:none; }
+  .warmup-body.show { display:block; }
+  .warmup-progress-wrap { background:white; border:1.5px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:12px; }
+  .warmup-progress-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .warmup-progress-label span:first-child { font-size:13px; font-weight:600; color:var(--ink); }
+  .warmup-progress-label span:last-child { font-size:11px; color:var(--ink-light); }
+  .warmup-bar-track { height:6px; background:var(--border); border-radius:99px; overflow:hidden; margin-bottom:6px; }
+  .warmup-bar-fill { height:100%; background:linear-gradient(90deg, var(--sage), var(--sage-dark)); border-radius:99px; transition:width .4s ease; }
+  .warmup-week-badge { display:inline-flex; align-items:center; gap:5px; background:var(--sage-light); border:1px solid var(--sage); color:var(--sage-dark); border-radius:100px; padding:3px 10px; font-size:11px; font-weight:600; }
+  .warmup-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
+  /* Batch size warning */
+  .batch-warn {
+    display:none; background:var(--gold-light); border:1.5px solid #e8c87a;
+    border-radius:13px; padding:13px 16px; margin-bottom:14px;
+    font-size:13px; color:var(--ink-mid); line-height:1.55;
+  }
+  .batch-warn.show { display:block; }
+  .batch-warn strong { color:var(--terra-dark); }
 </style>
 </head>
 <body>
@@ -446,8 +535,9 @@
 
   <!-- Launch -->
   <div class="launch-section">
+    <div class="batch-warn" id="batchWarn"></div>
     <div class="launch-info" id="launchInfo">
-      <strong>Ready?</strong> Hit the button below to copy the automation prompt, then paste it into the Claude sidebar. Claude handles everything from there — one product at a time, updating this dashboard as it goes.
+      <strong>Session mode.</strong> Each session covers a small batch of posts. Copy the prompt, paste it into the Claude sidebar — Claude posts the batch and tells you when to come back for the next one. Laptop needs to stay awake during each session, but can sleep between them.
     </div>
     <button class="btn-primary" id="launchBtn" onclick="launch()" disabled>
       &#10022; Generate &amp; Copy Prompt
@@ -475,6 +565,48 @@
       </p>
       <div class="combo-list" id="comboList"></div>
       <button class="add-combo-btn" onclick="addCombo()" id="addComboBtn">&#43; Add account + group combo</button>
+
+      <hr class="settings-divider">
+
+      <div class="settings-section-label">Mom's Blurbs</div>
+      <p style="font-size:13px;color:var(--ink-light);line-height:1.6;margin-bottom:14px;">
+        Add words, phrases, or vibes that sound like <em>you</em>. Claude will use these as inspiration when writing the 4–6 word opening blurb for each Facebook post — keeping your voice consistent without being repetitive.
+      </p>
+      <div class="blurb-input-row">
+        <input type="text" id="blurbInput" placeholder="e.g. obsessed with this find, great for gifting, game changer…"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addBlurb();}">
+        <button class="blurb-add-btn" onclick="addBlurb()">Add</button>
+      </div>
+      <div class="blurb-list" id="blurbList"></div>
+
+      <hr class="settings-divider">
+
+      <div class="settings-section-label">Posting Pace</div>
+      <p style="font-size:13px;color:var(--ink-light);line-height:1.6;margin-bottom:14px;">
+        Controls how fast Claude posts. When in doubt, use Normal.
+      </p>
+      <div class="pace-cards">
+        <div class="pace-card" id="paceCard_careful" onclick="selectPace('careful')">
+          <div class="pace-card-emoji">🐢</div>
+          <div class="pace-card-label">Careful</div>
+          <div class="pace-card-desc">New accounts or after any warnings</div>
+          <span class="pace-card-stats">4 posts · 30 min break</span>
+        </div>
+        <div class="pace-card" id="paceCard_normal" onclick="selectPace('normal')">
+          <div class="pace-card-emoji">👍</div>
+          <div class="pace-card-label">Normal</div>
+          <div class="pace-card-desc">Recommended for most accounts</div>
+          <span class="pace-card-stats">6 posts · 20 min break</span>
+        </div>
+        <div class="pace-card" id="paceCard_active" onclick="selectPace('active')">
+          <div class="pace-card-emoji">⚡</div>
+          <div class="pace-card-label">Active</div>
+          <div class="pace-card-desc">Established accounts only</div>
+          <span class="pace-card-stats">8 posts · 15 min break</span>
+        </div>
+      </div>
+      <p class="pacing-hint" id="paceHint"></p>
+
       <button class="settings-save-btn" onclick="closeSettings()">Done</button>
     </div>
   </div>
@@ -486,14 +618,35 @@
 const COMBO_COLORS = ['#7eb8a0','#e8856a','#c9913a','#8a85d4','#d47eb8','#6aa3d4','#8ac470','#d4a46a'];
 let queue = [];
 let combos = [];
+let blurbs = [];
+const PACE_PRESETS = {
+  careful: { minDelay:60, maxDelay:120, switchDelay:90, sessionSize:4,  sessionBreak:30, spreadHours:12, dailyMax:15 },
+  normal:  { minDelay:45, maxDelay:90,  switchDelay:60, sessionSize:6,  sessionBreak:20, spreadHours:10, dailyMax:25 },
+  active:  { minDelay:30, maxDelay:60,  switchDelay:45, sessionSize:8,  sessionBreak:15, spreadHours:8,  dailyMax:40 },
+};
+let pacing = { ...PACE_PRESETS.normal, preset:'normal' };
+let warmup = { enabled:false, currentLimit:20, targetLimit:40, weeklyIncrement:5, weekStart:null };
 
 function extractAsin(url){
   const m = url.match(/\/(?:dp|gp\/product|ASIN)\/([A-Z0-9]{10})/i);
   return m ? m[1].toUpperCase() : null;
 }
 
+function isFacebookUrl(url){
+  if(!url) return false;
+  try{
+    const host = new URL(url).hostname.replace(/^www\./,'');
+    return /(facebook\.com|fb\.com)$/.test(host);
+  }catch(e){ return false; }
+}
+
 function getInvalidCombos(){
-  return combos.filter(c => !c.accountName.trim() || !c.groupUrl.trim() || !(c.template||'').trim());
+  return combos.filter(c =>
+    !c.accountName.trim() ||
+    !c.groupUrl.trim() ||
+    !(c.template||'').trim() ||
+    !isFacebookUrl(c.groupUrl)
+  );
 }
 function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v)); }catch(e){ return null; } }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -502,24 +655,243 @@ function saveQueue(){ ls('mph2_queue', JSON.stringify(queue)); }
 function loadQueue(){ try{ const v=ls('mph2_queue'); queue=v?JSON.parse(v):[]; }catch(e){ queue=[]; } }
 function saveCombos(){ ls('mph2_combos', JSON.stringify(combos)); }
 function loadCombos(){ try{ const v=ls('mph2_combos'); combos=v?JSON.parse(v):[]; }catch(e){ combos=[]; } }
+function saveBlurbs(){ ls('mph2_blurbs', JSON.stringify(blurbs)); }
+function loadBlurbs(){ try{ const v=ls('mph2_blurbs'); blurbs=v?JSON.parse(v):[]; }catch(e){ blurbs=[]; } }
+function savePacing(){ ls('mph2_pacing', JSON.stringify(pacing)); }
+function loadPacing(){
+  try{
+    const v = ls('mph2_pacing');
+    if(v){
+      const saved = JSON.parse(v);
+      const preset = saved.preset || 'normal';
+      // Apply preset values as base, then overlay saved (in case preset values changed)
+      pacing = { ...PACE_PRESETS[preset] || PACE_PRESETS.normal, ...PACE_PRESETS[preset], preset };
+    }
+  }catch(e){}
+}
+function saveWarmup(){ ls('mph2_warmup', JSON.stringify(warmup)); }
+function loadWarmup(){
+  try{
+    const v=ls('mph2_warmup');
+    if(v) warmup = Object.assign({enabled:false,currentLimit:20,targetLimit:40,weeklyIncrement:5,weekStart:null}, JSON.parse(v));
+  }catch(e){}
+}
+
+function effectiveDailyMax(){
+  return warmup.enabled ? warmup.currentLimit : pacing.dailyMax;
+}
+
+function advanceWarmupIfNeeded(){
+  if(!warmup.enabled || warmup.currentLimit >= warmup.targetLimit) return;
+  const now = Date.now();
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  if(!warmup.weekStart){
+    warmup.weekStart = now;
+    saveWarmup(); return;
+  }
+  const elapsed = now - warmup.weekStart;
+  const weeksElapsed = Math.floor(elapsed / weekMs);
+  if(weeksElapsed >= 1){
+    warmup.currentLimit = Math.min(warmup.targetLimit, warmup.currentLimit + weeksElapsed * warmup.weeklyIncrement);
+    warmup.weekStart = now - (elapsed % weekMs); // carry over fractional week
+    saveWarmup();
+  }
+}
 
 // ── Init ──
 function init(){
   loadQueue();
   loadCombos();
+  loadBlurbs();
+  loadPacing();
+  loadWarmup();
+  advanceWarmupIfNeeded();
   renderSettingsCombos();
+  renderBlurbs();
+  renderPaceCards();
   renderQueue();
   checkWarning();
   updateAddBtn();
   updateLaunchBtn();
+  updateBatchWarn();
 }
 
 // ── Combos ──
 function addCombo(){
   if(combos.length >= 8){ toast('Max 8 combos'); return; }
-  combos.push({ id:'c'+Date.now(), accountName:'', groupName:'', groupUrl:'', template:'', color:COMBO_COLORS[combos.length%COMBO_COLORS.length] });
+  combos.push({ id:'c'+Date.now(), accountName:'', groupName:'', groupUrl:'', template:'', commentTemplate:'', color:COMBO_COLORS[combos.length%COMBO_COLORS.length] });
   saveCombos();
   renderSettingsCombos();
+}
+
+// ── Blurbs ──
+function addBlurb(){
+  const inp = document.getElementById('blurbInput');
+  const text = inp.value.trim().slice(0, 120); // cap at 120 chars
+  if(!text) return;
+  if(blurbs.some(b=>b.toLowerCase()===text.toLowerCase())){ toast('Already in your blurbs'); inp.select(); return; }
+  if(blurbs.length >= 30){ toast('Max 30 blurbs'); return; }
+  blurbs.push(text);
+  saveBlurbs();
+  renderBlurbs();
+  inp.value = '';
+  inp.focus();
+}
+
+function removeBlurb(idx){
+  blurbs.splice(idx, 1);
+  saveBlurbs();
+  renderBlurbs();
+}
+
+function renderBlurbs(){
+  const list = document.getElementById('blurbList');
+  if(!list) return;
+  if(blurbs.length === 0){
+    list.innerHTML = '<span class="blurb-empty">No blurbs yet — add some phrases above</span>';
+    return;
+  }
+  list.innerHTML = blurbs.map((b, i)=>`
+    <span class="blurb-pill">
+      ${esc(b)}
+      <button class="blurb-pill-remove" onclick="removeBlurb(${i})" title="Remove">✕</button>
+    </span>`).join('');
+}
+
+// ── Pacing ──
+const PACE_LABELS = {
+  careful: { daily:'Up to 15 posts/day across the day' },
+  normal:  { daily:'Up to 25 posts/day across the day' },
+  active:  { daily:'Up to 40 posts/day across the day' },
+};
+
+function renderPaceCards(){
+  ['careful','normal','active'].forEach(name=>{
+    const card = document.getElementById('paceCard_'+name);
+    if(card) card.className = 'pace-card' + (pacing.preset===name ? ' selected' : '');
+  });
+  const hint = document.getElementById('paceHint');
+  if(hint) hint.textContent = PACE_LABELS[pacing.preset]?.daily || '';
+}
+
+function selectPace(name){
+  if(!PACE_PRESETS[name]) return;
+  pacing = { ...PACE_PRESETS[name], preset:name };
+  savePacing();
+  renderPaceCards();
+  updateBatchWarn();
+  updateLaunchBtn();
+}
+
+// ── Warmup ──
+function renderWarmup(){
+  const enabledEl = document.getElementById('warmupEnabled');
+  if(enabledEl) enabledEl.checked = warmup.enabled;
+  const body = document.getElementById('warmupBody');
+  if(body) body.className = 'warmup-body' + (warmup.enabled ? ' show' : '');
+
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+  set('warmupStart', warmup.currentLimit);
+  set('warmupTarget', warmup.targetLimit);
+  set('warmupIncrement', warmup.weeklyIncrement);
+
+  // Progress bar
+  const pct = warmup.targetLimit > warmup.currentLimit
+    ? Math.round((warmup.currentLimit - (warmup.currentLimit - warmup.weeklyIncrement)) / (warmup.targetLimit - (warmup.targetLimit - warmup.weeklyIncrement * Math.ceil((warmup.targetLimit - warmup.currentLimit) / warmup.weeklyIncrement + 1))) * 100)
+    : 100;
+  // Simpler: progress from startLimit to targetLimit
+  const startGuess = warmup.currentLimit; // approximate — we don't store original start
+  const progressPct = warmup.targetLimit > 0
+    ? Math.round(Math.min(100, (warmup.currentLimit / warmup.targetLimit) * 100))
+    : 100;
+
+  const fillEl = document.getElementById('warmupBarFill');
+  if(fillEl) fillEl.style.width = progressPct + '%';
+
+  const labelEl = document.getElementById('warmupProgressLabel');
+  if(labelEl){
+    if(warmup.currentLimit >= warmup.targetLimit){
+      labelEl.textContent = `Target reached · ${warmup.currentLimit} posts/day`;
+    } else {
+      const weeksLeft = Math.ceil((warmup.targetLimit - warmup.currentLimit) / warmup.weeklyIncrement);
+      labelEl.textContent = `Current limit · ${warmup.currentLimit} posts/day`;
+      const eta = document.getElementById('warmupETA');
+      if(eta) eta.textContent = `⚑ ${weeksLeft} week${weeksLeft!==1?'s':''} to reach ${warmup.targetLimit}/day at +${warmup.weeklyIncrement}/week. Next increase: ${nextWarmupDate()}.`;
+    }
+  }
+
+  const minEl = document.getElementById('warmupBarMin');
+  const maxEl = document.getElementById('warmupBarMax');
+  if(minEl) minEl.textContent = '0';
+  if(maxEl) maxEl.textContent = warmup.targetLimit + '/day';
+
+  const badgeEl = document.getElementById('warmupWeekBadge');
+  if(badgeEl){
+    if(warmup.currentLimit >= warmup.targetLimit){
+      badgeEl.innerHTML = `<span class="warmup-week-badge">✓ Target reached</span>`;
+    } else if(warmup.weekStart){
+      const daysIn = Math.floor((Date.now() - warmup.weekStart) / (24*60*60*1000));
+      const daysLeft = 7 - (daysIn % 7);
+      badgeEl.innerHTML = `<span class="warmup-week-badge">${daysLeft}d until next increase</span>`;
+    } else {
+      badgeEl.innerHTML = `<span class="warmup-week-badge">Week 1</span>`;
+    }
+  }
+}
+
+function nextWarmupDate(){
+  if(!warmup.weekStart) return 'next week';
+  const next = new Date(warmup.weekStart + 7*24*60*60*1000);
+  return next.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+
+function toggleWarmup(){
+  warmup.enabled = document.getElementById('warmupEnabled').checked;
+  if(warmup.enabled && !warmup.weekStart) warmup.weekStart = Date.now();
+  saveWarmup();
+  renderWarmup();
+  updateBatchWarn();
+}
+
+function updateWarmup(){
+  const get = (id, def, min, max) => {
+    const v = parseInt(document.getElementById(id)?.value, 10);
+    return isNaN(v) ? def : Math.min(max, Math.max(min, v));
+  };
+  warmup.currentLimit    = get('warmupStart', 20, 5, 60);
+  warmup.targetLimit     = get('warmupTarget', 40, 10, 60);
+  warmup.weeklyIncrement = get('warmupIncrement', 5, 1, 15);
+  if(warmup.currentLimit > warmup.targetLimit) warmup.targetLimit = warmup.currentLimit;
+  saveWarmup();
+  renderWarmup();
+  updateBatchWarn();
+}
+
+function updateBatchWarn(){
+  const el = document.getElementById('batchWarn');
+  if(!el) return;
+  if(queue.length === 0 || combos.length === 0){ el.className='batch-warn'; return; }
+
+  const limit = effectiveDailyMax();
+  const perAccount = {};
+  combos.forEach(c=>{
+    const acct = c.accountName.trim() || c.id;
+    if(!perAccount[acct]) perAccount[acct] = 0;
+    queue.forEach(p=>{
+      const dis = p.disabledCombos || {};
+      if(!dis[c.id] && (!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')){
+        perAccount[acct]++;
+      }
+    });
+  });
+
+  const overLimit = Object.entries(perAccount).filter(([,n])=>n>limit);
+  if(overLimit.length === 0){ el.className='batch-warn'; return; }
+
+  const limitLabel = warmup.enabled ? `warmup limit of ${limit}` : `daily limit of ${limit}`;
+  const lines = overLimit.map(([acct,n])=>`<strong>${esc(acct)}</strong>: ${n} posts`).join(' · ');
+  el.innerHTML = `⚠️ <strong>Batch exceeds ${limitLabel}.</strong> ${lines}. Consider splitting across multiple days.`;
+  el.className = 'batch-warn show';
 }
 
 function removeCombo(id){
@@ -603,9 +975,14 @@ function renderSettingsCombos(){
           onblur="sanitizeGroupUrl('${c.id}')">
       </div>
       <div class="combo-field full">
-        <label>Chickadeasy Template Name</label>
+        <label>Chickadeasy Post Template</label>
         <input type="text" placeholder="Exact name from Chickadeasy dropdown, e.g. Default Template" value="${esc(c.template||'')}"
           oninput="updateCombo('${c.id}','template',this.value)">
+      </div>
+      <div class="combo-field full">
+        <label>Chickadeasy Comment Template <span style="font-weight:400;opacity:.7;">(optional — for first comment)</span></label>
+        <input type="text" placeholder="e.g. Comment Template — leave blank to post URL only" value="${esc(c.commentTemplate||'')}"
+          oninput="updateCombo('${c.id}','commentTemplate',this.value)">
       </div>
     </div>
   `).join('');
@@ -660,6 +1037,7 @@ function removeFromQueue(id){
   saveQueue();
   renderQueue();
   updateLaunchBtn();
+  updateBatchWarn();
 }
 
 function isAmazonUrl(url){
@@ -688,7 +1066,7 @@ function addUrlsToQueue(urls){
     queue.push({ id:'p'+Date.now()+Math.random().toString(36).slice(2,6), url, addedAt:Date.now(), statuses, disabledCombos:{} });
     added++;
   });
-  if(added>0){ saveQueue(); renderQueue(); updateLaunchBtn(); }
+  if(added>0){ saveQueue(); renderQueue(); updateLaunchBtn(); updateBatchWarn(); }
   if(added>1) toast(`Added ${added} product${added!==1?'s':''}`+(dupes?` (${dupes} duplicate${dupes!==1?'s':''} skipped)`:''));
   else if(added===1) toast('Added to queue'+(dupes?' (1 duplicate skipped)':''));
   else if(dupes>0) toast('Already in queue — duplicate skipped');
@@ -824,30 +1202,79 @@ function showConfirm(message, onConfirm){
     <div class="copy-fallback-body">
       <p style="margin-bottom:16px;">${esc(message)}</p>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button class="btn-secondary" onclick="this.closest('.copy-fallback-overlay').remove()">Cancel</button>
+        <button class="btn-secondary" id="_confirmCancel">Cancel</button>
         <button class="settings-save-btn" style="width:auto;padding:10px 20px;margin-top:0;font-size:14px;" id="_confirmOk">Clear</button>
       </div>
     </div>
   </div>`;
   document.body.appendChild(el);
-  el.querySelector('#_confirmOk').onclick = ()=>{ el.remove(); onConfirm(); };
-  el.addEventListener('keydown', e=>{ if(e.key==='Escape') el.remove(); });
+  const dismiss = ()=>el.remove();
+  const confirm = ()=>{ el.remove(); onConfirm(); };
+  el.querySelector('#_confirmOk').onclick = confirm;
+  el.querySelector('#_confirmCancel').onclick = dismiss;
+  el.onclick = e=>{ if(e.target===el) dismiss(); };
+  // Use document-level keydown so ESC fires regardless of focus state
+  const onKey = e=>{ if(e.key==='Escape'){ e.stopPropagation(); dismiss(); document.removeEventListener('keydown',onKey,true); } };
+  document.addEventListener('keydown', onKey, true);
+  // Auto-focus cancel so keyboard works naturally
+  el.querySelector('#_confirmCancel').focus();
+}
+
+function getPendingItems(){
+  return queue.filter(p=>{
+    const dis = p.disabledCombos || {};
+    return combos.some(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
+  });
+}
+
+function getNextSessionItems(){
+  // Pack products until we'd exceed sessionSize combos.
+  // A single product with more combos than sessionSize is always included alone.
+  const pending = getPendingItems();
+  const items = [];
+  let comboCount = 0;
+  for(const p of pending){
+    const dis = p.disabledCombos || {};
+    const active = combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
+    if(comboCount + active > pacing.sessionSize && items.length > 0) break;
+    items.push(p);
+    comboCount += active;
+  }
+  return items;
 }
 
 function updateLaunchBtn(){
-  const ready = queue.length>0 && combos.length>0;
   const btn = document.getElementById('launchBtn');
-  btn.disabled = !ready;
-  const anyPosted = queue.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
-  const pendingCount = queue.filter(p=>{
-    const dis = p.disabledCombos || {};
-    return combos.some(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
-  }).length;
-  if(anyPosted && pendingCount > 0){
-    btn.innerHTML = '&#10022; Resume Batch';
-  } else {
+  const pendingItems = getPendingItems();
+
+  if(pendingItems.length === 0 || combos.length === 0){
+    btn.disabled = true;
     btn.innerHTML = '&#10022; Generate &amp; Copy Prompt';
+    return;
   }
+
+  btn.disabled = false;
+
+  const sessionItems = getNextSessionItems();
+  const sessionCombos = sessionItems.reduce((s,p)=>{
+    const dis = p.disabledCombos || {};
+    return s + combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
+  }, 0);
+
+  const totalPendingCombos = pendingItems.reduce((s,p)=>{
+    const dis = p.disabledCombos || {};
+    return s + combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
+  }, 0);
+
+  const remainingCombos = totalPendingCombos - sessionCombos;
+  const sessionsAfter = remainingCombos > 0 ? Math.ceil(remainingCombos / pacing.sessionSize) : 0;
+  const anyPosted = queue.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
+  const verb = anyPosted ? 'Continue' : 'Start';
+  const afterLabel = sessionsAfter > 0
+    ? `${sessionsAfter} session${sessionsAfter!==1?'s':''} after`
+    : 'last session';
+
+  btn.innerHTML = `&#10022; ${verb} session &nbsp;<span style="font-weight:400;font-size:13px;opacity:.85">${sessionCombos} post${sessionCombos!==1?'s':''} &middot; ${afterLabel}</span>`;
 }
 
 function toggleCombo(productId, comboId){
@@ -902,6 +1329,25 @@ function buildPrompt(items){
   const productList = items.map((p,i)=>`  Product ${i+1} [ID: ${p.id}]: ${p.url}`).join('\n');
   const totalPosts = items.reduce((sum,p)=>{ const dis=p.disabledCombos||{}; return sum+combos.filter(c=>!dis[c.id]).length; },0);
 
+  // Blurb guidance section
+  const blurbSection = blurbs.length > 0
+    ? `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MOM'S VOICE — BLURB GUIDANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For every Facebook post, write a fresh 4–6 word opening blurb in the first line of the post (before the Chickadeasy caption). The blurb should feel personal, slightly different each time, and reflect this person's voice and style. Draw inspiration from these words and phrases she provided:
+
+${blurbs.map(b=>`  • ${b.replace(/[\r\n\t]/g,' ')}`).join('\n')}
+
+Rules for the blurb:
+- 4–6 words maximum, punchy and natural-sounding
+- Never repeat the exact same blurb twice in one batch
+- Place it on its own line at the very top of the post body, followed by a blank line, then the Chickadeasy caption
+- Do NOT add hashtags or emojis unless they naturally match her voice from the list above`
+    : `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPENING BLURB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For every Facebook post, write a fresh 4–6 word opening blurb on the first line of the post (before the Chickadeasy caption). Keep it warm, natural, and slightly different each time. No hashtags or emojis unless they feel right.`;
+
   const perProductSteps = items.map((p,i)=>{
     const disabled = p.disabledCombos || {};
     const activeCombos = combos.filter(c=>!disabled[c.id]);
@@ -915,32 +1361,62 @@ function buildPrompt(items){
     });
 
     const templateBlocks = Object.entries(templateGroups).map(([tmpl, tCombos], ti)=>{
-      const comboSteps = tCombos.map((c,ci)=>`
+      const comboSteps = tCombos.map((c,ci)=>{
+        const hasCommentTmpl = (c.commentTemplate||'').trim();
+        const commentStep = hasCommentTmpl
+          ? `        FIRST COMMENT:
+          a. After the post publishes, find the comment box on the new post
+          b. Navigate back to the Amazon tab and use Chickadeasy to generate the comment caption:
+             - In the SiteStripe template dropdown, select "${c.commentTemplate.trim()}" — match exactly
+             - Click the chickadee bird icon — comment caption is now in clipboard
+          c. Paste the comment caption, then add the affiliate URL on a new line:
+             ${p.url}
+          d. Submit the comment`
+          : `        FIRST COMMENT:
+          a. After the post publishes, find the comment box on the new post
+          b. Type or paste this URL as the first comment:
+             ${p.url}
+          c. Submit the comment`;
+
+        return `
       COMBO — Account: "${c.accountName.trim()}" → "${(c.groupName||c.groupUrl).trim()}" [comboId: ${c.id}]
         a. Execute on dashboard tab: window.setWorking('${p.id}','${c.id}')
         b. On facebook.com, confirm active account is "${c.accountName.trim()}" — switch if needed
         c. Navigate to: ${c.groupUrl.trim()}
         d. Wait for group page to fully load
         e. Click "Write something..." or "Create post" to open the composer
-        f. Click inside the text area and paste (Ctrl+V) — the Chickadeasy caption for template "${tmpl}"
-        g. Click the blue Post button and wait for confirmation
-        h. On success: window.updateStatus('${p.id}','${c.id}','posted')
-           On failure: window.updateStatus('${p.id}','${c.id}','failed') — describe error, continue`).join('\n');
+        f. Click the "Photo/Video" or camera icon in the composer to add media
+        g. Drag the product image (from your product image tab) into the photo attachment area, OR use the file picker if drag-and-drop isn't available. If this is not the first combo using this image, try selecting a different image from the product's image carousel (alternate angle or lifestyle shot) to avoid identical image fingerprints across posts.
+        h. Click inside the text area. On the FIRST LINE, write the 4–6 word opening blurb — make it slightly different from the blurb used for any previous combo in this batch (same product, different phrasing). Press Enter twice. Then paste (Ctrl+V) the Chickadeasy caption for template "${tmpl}". Do NOT include the Amazon URL in the post body.
+        i. Click the blue Post button and wait for confirmation
+        j. On success: window.updateStatus('${p.id}','${c.id}','posted')
+           On failure: window.updateStatus('${p.id}','${c.id}','failed') — describe error, continue
+${commentStep}
+        ⏱ MANDATORY DELAY: After this combo is fully complete (post + comment submitted), wait a randomized ${pacing.minDelay}–${pacing.maxDelay} seconds before starting the next combo. Vary the exact wait — don't use the same number twice in a row.`;
+      }).join('\n');
 
       return `
   TEMPLATE GROUP ${ti+1}: "${tmpl}" → used by ${tCombos.length} combo(s)
 
-    STEP — Generate caption with Chickadeasy (template: "${tmpl}"):
+    STEP A — Grab product image:
       a. Navigate to: ${p.url}
-      b. Wait up to 20 seconds for the Chickadeasy SiteStripe bar to appear at the top of the page (chickadee bird icon)
-      c. While waiting, grab the product title from this Amazon tab: read the text of #productTitle element (or fall back to the page <title> tag before the first colon). Then switch to the dashboard tab and execute:
+      b. Wait up to 20 seconds for the page to fully load (including the Chickadeasy SiteStripe bar)
+      c. While waiting, grab the product title: read the text of #productTitle element (or fall back to page <title> before the first colon). Then execute on the dashboard tab:
          window.setProductName('${p.id}', 'THE TITLE YOU JUST READ')
          Then switch back to the Amazon tab.
-      d. In the SiteStripe template dropdown, select "${tmpl}" — match the name exactly
-      e. Click the chickadee bird icon — the caption is now copied to your clipboard
-      f. Navigate to https://www.facebook.com (keep the caption in clipboard — do not copy anything else)
+      d. Find the main product image: look for the element with id "landingImage" — get its src attribute (use the full-resolution URL, not a thumbnail). If not found, check #imgTagWrappingLink img or the first large image in #imageBlock.
+      e. Open that image URL in a new tab so it's ready to drag into the Facebook post composer.
 
-    STEP — Post to all combos using this caption:
+    STEP B — Write the opening blurb:
+      Before posting, compose a 4–6 word opening blurb for this product. It will go at the top of every post in this template group. Write it now and remember it — it should feel natural and personal.
+
+    STEP C — Generate post caption with Chickadeasy (template: "${tmpl}"):
+      a. On the Amazon tab, wait for the Chickadeasy SiteStripe bar to appear at the top of the page
+      b. In the SiteStripe template dropdown, select "${tmpl}" — match the name exactly
+      c. Click the chickadee bird icon — the post caption is now in clipboard
+      d. Navigate to https://www.facebook.com (keep caption in clipboard — do not copy anything else)
+
+    STEP D — Post to all combos using this caption + image:
 ${comboSteps}`;
     }).join('\n\n  ---\n');
 
@@ -967,8 +1443,35 @@ ${templateBlocks}
     return `  ${label} [${p.id}]:\n${comboSummary}`;
   }).join('\n');
 
-  return `AUTOMATED FACEBOOK POSTING — ${items.length} PRODUCT(S) × ${combos.length} COMBO(S)
+  // Compute suggested gap before next session, based on spread window and remaining work
+  const allPendingCombos = queue.reduce((s,p)=>{
+    const dis = p.disabledCombos || {};
+    return s + combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
+  }, 0);
+  const totalSessions = Math.max(1, Math.ceil(allPendingCombos / pacing.sessionSize));
+  const sessionGap = totalSessions > 1
+    ? Math.max(pacing.sessionBreak, Math.floor((pacing.spreadHours * 60) / totalSessions))
+    : 0;
+  const hasMoreSessions = allPendingCombos > totalPosts;
 
+  // Batch size warning for prompt preamble
+  const effectiveMax = effectiveDailyMax();
+  const perAccountCounts = {};
+  combos.forEach(c=>{
+    const acct = c.accountName.trim() || c.id;
+    if(!perAccountCounts[acct]) perAccountCounts[acct] = 0;
+    items.forEach(p=>{
+      const dis = p.disabledCombos || {};
+      if(!dis[c.id]) perAccountCounts[acct]++;
+    });
+  });
+  const overLimitAccts = Object.entries(perAccountCounts).filter(([,n])=>n>effectiveMax);
+  const batchWarningLine = overLimitAccts.length > 0
+    ? `\n⚠️ LARGE BATCH WARNING: ${overLimitAccts.map(([a,n])=>`"${a}" has ${n} posts (${warmup.enabled?'warmup':'daily'} limit: ${effectiveMax})`).join(', ')}. Proceed with extra caution — enforce all pacing delays strictly.\n`
+    : '';
+
+  return `AUTOMATED FACEBOOK POSTING — ${items.length} PRODUCT(S) × ${combos.length} COMBO(S)
+${batchWarningLine}
 Generated by Mom's Post Helper. Follow every step precisely. Do not skip steps.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -976,6 +1479,8 @@ ${isResume ? 'RESUMING BATCH — STATUS SNAPSHOT' : 'STATUS SNAPSHOT'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${isResume ? 'This is a resumed batch. Some posts are already done — do NOT re-post them. The steps below only include work that still needs to happen. Use this snapshot to orient yourself:\n' : ''}${statusSnapshot}
 ${isResume ? '\nOnly process steps listed below. Anything marked "posted" above is complete — skip it.' : ''}
+
+${blurbSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IMPORTANT: THE DASHBOARD TAB
@@ -1009,7 +1514,39 @@ HOW TO SWITCH FACEBOOK ACCOUNTS
 - In the dropdown, find the account name and click it
 - Wait for the full page reload to complete
 - Verify the new account name appears top-right
+- ⏱ After switching accounts, wait ${pacing.switchDelay} seconds before navigating to the group. This cooldown is mandatory.
 - If the account is missing from the dropdown: mark that combo as failed, inform the user, continue
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚑ ACCOUNT SAFETY RULES — READ BEFORE STARTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+These rules mirror how a real person posts. The goal is organic-looking activity, not speed.
+
+SESSION CONTEXT — this is a single session:
+- Complete all ${totalPosts} post${totalPosts!==1?'s':''} in this prompt, then stop. Do not take a mid-session break.
+- The user will paste a new prompt for the next session after a break. Your job is to finish this session cleanly and report when done.
+- Account switches within this session are fine — apply the ${pacing.switchDelay}s cooldown after each switch before navigating
+
+WITHIN-SESSION PACING:
+- Wait a randomized ${pacing.minDelay}–${pacing.maxDelay} seconds between each combo (not metronomic — vary it)
+- After switching accounts, wait ${pacing.switchDelay} seconds before navigating to the group
+- Let pages load fully and naturally — don't click before elements are rendered
+
+CONTENT VARIATION (prevents fingerprinting):
+- Every opening blurb must differ meaningfully — no two combos in the same session should start the same way
+- If the Chickadeasy caption is identical to one used in the last 5 posts, rephrase the blurb slightly more to offset it
+- Where the product carousel offers alternate shots, use a different image per template group
+
+STOP CONDITIONS — pause the entire batch and notify the user:
+- Facebook shows any rate-limit notice, "You're posting too fast", or "This action has been blocked"
+- Any account hits a security checkpoint, restriction, or phone verification prompt
+- You encounter a CAPTCHA or human verification on any account
+- Three or more consecutive posts fail without a clear technical reason
+
+HUMAN-LIKE MICRO-BEHAVIORS (do these naturally, not as a checklist):
+- Scroll the group feed for 3–5 seconds before opening the post composer
+- After a post publishes, stay on the post for a moment and scroll past it before navigating away
+- Occasionally scroll the newsfeed briefly while waiting between posts during the break
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IF ANYTHING GOES WRONG
@@ -1018,10 +1555,11 @@ IF ANYTHING GOES WRONG
 - Unexpected popup or dialog → describe it before clicking anything
 - Chickadeasy SiteStripe doesn't appear → scroll to top of page, wait 20s, refresh once, try again
 - Post composer won't open → refresh the group page once, try again
+- Product image can't be found or attached → skip the image for that combo, note it, continue
 - Group not found or access denied → mark combo as failed, continue
 - Any other error → mark the specific combo as failed, continue with the next one
 
-Say "All done! Posted ${totalPosts} post${totalPosts!==1?'s':''} across ${items.length} product${items.length!==1?'s':''} and ${combos.length} account${combos.length!==1?'s':''}." when fully finished.`;
+Say "Session complete ✓ Posted ${totalPosts} post${totalPosts!==1?'s':''} across ${items.length} product${items.length!==1?'s':''} and ${combos.length} account${combos.length!==1?'s':''}. ${hasMoreSessions ? `Come back in about ${sessionGap} minutes to start the next session — the dashboard will be ready.` : `That\'s the full queue — all done for today!'`}" when fully finished.`;
 }
 
 // ── Launch ──
@@ -1031,10 +1569,9 @@ async function launch(){
     toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
     return;
   }
-  const prompt = buildPrompt(queue.filter(p=>{
-    const dis = p.disabledCombos || {};
-    return combos.some(c=>!dis[c.id] && (!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed'));
-  }));
+  const items = getNextSessionItems();
+  if(!items.length){ toast('Nothing left to post!'); return; }
+  const prompt = buildPrompt(items);
   if(!prompt){ toast('Nothing left to post!'); return; }
 
   const ok = await doCopy(prompt);
@@ -1049,6 +1586,9 @@ async function launch(){
       btn.style.background = '';
       updateLaunchBtn();
     }, 1500);
+  } else {
+    // Fallback modal is already showing — toast so there's some button-area feedback too
+    toast('📋 Auto-copy blocked — use the popup to copy manually');
   }
 }
 
@@ -1132,7 +1672,12 @@ document.addEventListener('click', ()=>{
 });
 
 // ── Settings ──
-function openSettings(){ document.getElementById('settingsOverlay').className='settings-overlay open'; }
+function openSettings(){
+  advanceWarmupIfNeeded();
+  renderBlurbs();
+  renderPaceCards();
+  document.getElementById('settingsOverlay').className='settings-overlay open';
+}
 
 function forceCloseSettings(){
   // Always closes — used by ESC, X button, and click-outside
@@ -1148,15 +1693,7 @@ function forceCloseSettings(){
     if(p.disabledCombos) Object.keys(p.disabledCombos).forEach(id=>{ if(!validIds.has(id)) delete p.disabledCombos[id]; });
   });
   saveQueue(); saveCombos();
-  renderQueue(); checkWarning(); updateLaunchBtn();
-}
-
-function isFacebookUrl(url){
-  if(!url) return false;
-  try{
-    const host = new URL(url).hostname.replace(/^www\./,'');
-    return /(facebook\.com|fb\.com)$/.test(host);
-  }catch(e){ return false; }
+  renderQueue(); checkWarning(); updateLaunchBtn(); updateBatchWarn();
 }
 
 function closeSettings(){
@@ -1172,7 +1709,7 @@ function closeSettings(){
       const row = document.getElementById('crow_'+c.id);
       if(!row) return;
       const inputs = row.querySelectorAll('input');
-      // inputs: [accountName, groupName, groupUrl, template]
+      // inputs: [0:accountName, 1:groupName, 2:groupUrl, 3:template, 4:commentTemplate(optional)]
       [
         {idx:0, val:c.accountName, check: v=>v.trim()},
         {idx:2, val:c.groupUrl,    check: v=>v.trim() && isFacebookUrl(v)},
@@ -1200,7 +1737,11 @@ function closeSettings(){
 }
 
 function overlayClick(e){ if(e.target===document.getElementById('settingsOverlay')) forceCloseSettings(); }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') forceCloseSettings(); });
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && document.getElementById('settingsOverlay').classList.contains('open')){
+    forceCloseSettings();
+  }
+});
 
 // ── Public API for Claude ──
 window.setProductName = function(productId, name){
