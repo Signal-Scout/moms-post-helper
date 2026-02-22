@@ -160,6 +160,26 @@
   .queue-item.all-posted { opacity:.65; }
   .queue-item.all-posted .qi-num { background:var(--sage-light); border-color:var(--sage); color:var(--sage-dark); }
 
+  /* Batch dividers */
+  .batch-divider {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 0 6px; margin-top:4px;
+  }
+  .batch-divider:first-child { margin-top:0; padding-top:6px; }
+  .batch-divider::before, .batch-divider::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+  .batch-divider-label {
+    font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-light); white-space:nowrap; padding:0 4px;
+  }
+  .batch-divider.current .batch-divider-label {
+    color:var(--terra); background:var(--terra-light); border-radius:99px;
+    padding:2px 8px; border:1px solid rgba(179,97,45,.2);
+  }
+  .batch-divider.current::before, .batch-divider.current::after { background:rgba(179,97,45,.2); }
+  .batch-divider.done .batch-divider-label { color:var(--sage-dark); }
+
   .status-chip {
     display:flex; align-items:center; gap:5px;
     border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600;
@@ -212,7 +232,17 @@
   .btn-ghost.show { display:inline-flex; }
 
   .toast-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; }
-  .launch-section { margin-top:4px; }
+  /* Split button */
+  .btn-split {
+    width:100%; padding:13px 20px; margin-bottom:10px;
+    background:var(--cream); color:var(--ink-mid);
+    border:1.5px dashed var(--border); border-radius:13px;
+    font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
+    cursor:pointer; display:none; align-items:center; justify-content:center; gap:8px;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .btn-split.show { display:flex; }
+  .btn-split:hover { border-color:var(--terra); color:var(--terra-dark); background:var(--terra-light); }
   .launch-info {
     background:var(--cream); border:1px solid var(--border);
     border-radius:13px; padding:13px 16px; font-size:13px; color:var(--ink-mid);
@@ -539,6 +569,7 @@
     <div class="launch-info" id="launchInfo">
       <strong>Session mode.</strong> Each session covers a small batch of posts. Copy the prompt, paste it into the Claude sidebar — Claude posts the batch and tells you when to come back for the next one. Laptop needs to stay awake during each session, but can sleep between them.
     </div>
+    <button class="btn-split" id="splitBtn" onclick="splitIntoBatches()">⊞ Split queue into batches</button>
     <button class="btn-primary" id="launchBtn" onclick="launch()" disabled>
       &#10022; Generate &amp; Copy Prompt
     </button>
@@ -665,7 +696,7 @@ function loadPacing(){
       const saved = JSON.parse(v);
       const preset = saved.preset || 'normal';
       // Apply preset values as base, then overlay saved (in case preset values changed)
-      pacing = { ...PACE_PRESETS[preset] || PACE_PRESETS.normal, ...PACE_PRESETS[preset], preset };
+      pacing = { ...PACE_PRESETS[preset] || PACE_PRESETS.normal, preset };
     }
   }catch(e){}
 }
@@ -679,6 +710,77 @@ function loadWarmup(){
 
 function effectiveDailyMax(){
   return warmup.enabled ? warmup.currentLimit : pacing.dailyMax;
+}
+
+// ── Status helpers ──
+function isPendingStatus(status){
+  return !status || status === 'pending' || status === 'failed';
+}
+
+// ── Batch management ──
+function hasBatchAssignments(){
+  return queue.length > 0 && queue.every(p => p.batch != null);
+}
+
+function clearBatchAssignments(){
+  queue.forEach(p => p.batch = null);
+  saveQueue();
+}
+
+function splitIntoBatches(){
+  if(queue.length === 0) return 0;
+  let batchNum = 1;
+  let comboCount = 0;
+  queue.forEach(p => {
+    const dis = p.disabledCombos || {};
+    const active = combos.filter(c => !dis[c.id]).length;
+    if(comboCount > 0 && comboCount + active > pacing.sessionSize){
+      batchNum++;
+      comboCount = 0;
+    }
+    p.batch = batchNum;
+    comboCount += active;
+  });
+  saveQueue();
+  renderQueue();
+  updateSplitBtn();
+  updateLaunchBtn();
+  updateBatchWarn();
+  toast(`Queue split into ${batchNum} batch${batchNum!==1?'es':''}`);
+  return batchNum;
+}
+
+function getTotalBatches(){
+  if(!hasBatchAssignments()) return 0;
+  return Math.max(...queue.map(p => p.batch));
+}
+
+function getCurrentBatch(){
+  if(!hasBatchAssignments()) return null;
+  const sorted = [...new Set(queue.map(p => p.batch))].sort((a,b) => a-b);
+  for(const bn of sorted){
+    const hasPending = queue
+      .filter(p => p.batch === bn)
+      .some(p => {
+        const dis = p.disabledCombos || {};
+        return combos.some(c => !dis[c.id] && isPendingStatus(p.statuses[c.id]));
+      });
+    if(hasPending) return bn;
+  }
+  return null;
+}
+
+function getCurrentBatchItems(){
+  const bn = getCurrentBatch();
+  if(bn == null) return [];
+  return queue.filter(p => p.batch === bn);
+}
+
+function updateSplitBtn(){
+  const btn = document.getElementById('splitBtn');
+  if(!btn) return;
+  const show = queue.length > 0 && !hasBatchAssignments();
+  btn.className = 'btn-split' + (show ? ' show' : '');
 }
 
 function advanceWarmupIfNeeded(){
@@ -710,6 +812,7 @@ function init(){
   renderBlurbs();
   renderPaceCards();
   renderQueue();
+  updateSplitBtn();
   checkWarning();
   updateAddBtn();
   updateLaunchBtn();
@@ -778,7 +881,10 @@ function selectPace(name){
   if(!PACE_PRESETS[name]) return;
   pacing = { ...PACE_PRESETS[name], preset:name };
   savePacing();
+  queue.forEach(p=>p.batch=null); // batch sizes depend on sessionSize
+  saveQueue();
   renderPaceCards();
+  renderQueue();
   updateBatchWarn();
   updateLaunchBtn();
 }
@@ -1034,6 +1140,7 @@ function addToQueue(){
 
 function removeFromQueue(id){
   queue = queue.filter(p=>p.id!==id);
+  queue.forEach(p=>p.batch=null); // batches are now potentially wrong size
   saveQueue();
   renderQueue();
   updateLaunchBtn();
@@ -1066,7 +1173,7 @@ function addUrlsToQueue(urls){
     queue.push({ id:'p'+Date.now()+Math.random().toString(36).slice(2,6), url, addedAt:Date.now(), statuses, disabledCombos:{} });
     added++;
   });
-  if(added>0){ saveQueue(); renderQueue(); updateLaunchBtn(); updateBatchWarn(); }
+  if(added>0){ queue.forEach(p=>p.batch=null); saveQueue(); renderQueue(); updateLaunchBtn(); updateBatchWarn(); }
   if(added>1) toast(`Added ${added} product${added!==1?'s':''}`+(dupes?` (${dupes} duplicate${dupes!==1?'s':''} skipped)`:''));
   else if(added===1) toast('Added to queue'+(dupes?' (1 duplicate skipped)':''));
   else if(dupes>0) toast('Already in queue — duplicate skipped');
@@ -1087,6 +1194,43 @@ document.getElementById('urlInput').addEventListener('paste', function(e){
   // single URL — let it paste normally and user hits Add/Enter
 });
 
+function renderQueueItem(p, i){
+  const asin = extractAsin(p.url);
+  const displayLabel = p.name
+    ? p.name
+    : asin ? `ASIN: ${asin}`
+    : p.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,55)+(p.url.length>65?'…':'');
+  const disabled = p.disabledCombos || {};
+  const chips = combos.map(c=>{
+    const isDisabled = !!disabled[c.id];
+    const isPosted = p.statuses[c.id]==='posted';
+    const st = isDisabled ? 'skipped' : (p.statuses[c.id] || 'pending');
+    const label = c.groupName || c.accountName || 'Combo '+(combos.indexOf(c)+1);
+    const title = isDisabled ? `Click to re-enable for this product` : isPosted ? `Posted` : `Click to skip for this product`;
+    const clickable = !isPosted;
+    return `<span class="status-chip ${st}" title="${title}"${clickable?` onclick="toggleCombo('${p.id}','${c.id}')"`:''}><span class="chip-dot"></span>${esc(label.length>18?label.slice(0,16)+'…':label)}</span>`;
+  }).join('');
+  const enabledCombos = combos.filter(c=>!disabled[c.id]);
+  const allPosted = enabledCombos.length>0 && enabledCombos.every(c=>p.statuses[c.id]==='posted');
+  const hasFailed = enabledCombos.some(c=>p.statuses[c.id]==='failed');
+  return `<div class="queue-item no-anim${allPosted?' all-posted':''}" id="qi_${p.id}"
+    draggable="true"
+    ondragstart="dragStart(event,${i})"
+    ondragover="dragOver(event,${i})"
+    ondragleave="dragLeave(event)"
+    ondragend="dragEnd(event)"
+    ondrop="dragDrop(event,${i})">
+    <span class="qi-drag" title="Drag to reorder">⠿</span>
+    <div class="qi-num">${allPosted ? '✓' : i+1}</div>
+    <div class="qi-content">
+      <div class="qi-url"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(displayLabel)}</a></div>
+      <div class="qi-statuses">${chips.length?chips:'<span style="font-size:12px;color:var(--ink-light)">Set up combos in Settings</span>'}</div>
+    </div>
+    ${hasFailed ? `<button class="qi-retry" onclick="launchSingle('${p.id}',this)" title="Copy prompt to retry failed groups">↺</button>` : ''}
+    <button class="qi-remove" onclick="removeFromQueue('${p.id}')" title="Remove">&#10005;</button>
+  </div>`;
+}
+
 function renderQueue(){
   const body = document.getElementById('queueBody');
   const countEl = document.getElementById('queueCount');
@@ -1100,48 +1244,39 @@ function renderQueue(){
     launchInfo.className='launch-info';
     document.getElementById('clearDoneBtn').className='btn-ghost';
     document.getElementById('clearAllBtn').className='btn-ghost';
+    updateSplitBtn();
     checkAllDone();
     return;
   }
   countEl.textContent = queue.length+' product'+(queue.length!==1?'s':'');
   launchInfo.className='launch-info show';
+  updateSplitBtn();
 
-  body.innerHTML = queue.map((p,i)=>{
-    const asin = extractAsin(p.url);
-    const displayLabel = p.name
-      ? p.name
-      : asin ? `ASIN: ${asin}`
-      : p.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,55)+(p.url.length>65?'…':'');
-    const disabled = p.disabledCombos || {};
-    const chips = combos.map(c=>{
-      const isDisabled = !!disabled[c.id];
-      const isPosted = p.statuses[c.id]==='posted';
-      const st = isDisabled ? 'skipped' : (p.statuses[c.id] || 'pending');
-      const label = c.groupName || c.accountName || 'Combo '+(combos.indexOf(c)+1);
-      const title = isDisabled ? `Click to re-enable for this product` : isPosted ? `Posted` : `Click to skip for this product`;
-      const clickable = !isPosted;
-      return `<span class="status-chip ${st}" title="${title}"${clickable?` onclick="toggleCombo('${p.id}','${c.id}')"`:''}><span class="chip-dot"></span>${esc(label.length>18?label.slice(0,16)+'…':label)}</span>`;
-    }).join('');
-    const enabledCombos = combos.filter(c=>!disabled[c.id]);
-    const allPosted = enabledCombos.length>0 && enabledCombos.every(c=>p.statuses[c.id]==='posted');
-    const hasFailed = enabledCombos.some(c=>p.statuses[c.id]==='failed');
-    return `<div class="queue-item no-anim${allPosted?' all-posted':''}" id="qi_${p.id}"
-      draggable="true"
-      ondragstart="dragStart(event,${i})"
-      ondragover="dragOver(event,${i})"
-      ondragleave="dragLeave(event)"
-      ondragend="dragEnd(event)"
-      ondrop="dragDrop(event,${i})">
-      <span class="qi-drag" title="Drag to reorder">⠿</span>
-      <div class="qi-num">${allPosted ? '✓' : i+1}</div>
-      <div class="qi-content">
-        <div class="qi-url"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(displayLabel)}</a></div>
-        <div class="qi-statuses">${chips.length?chips:'<span style="font-size:12px;color:var(--ink-light)">Set up combos in Settings</span>'}</div>
-      </div>
-      ${hasFailed ? `<button class="qi-retry" onclick="launchSingle('${p.id}',this)" title="Copy prompt to retry failed groups">↺</button>` : ''}
-      <button class="qi-remove" onclick="removeFromQueue('${p.id}')" title="Remove">&#10005;</button>
-    </div>`;
-  }).join('');
+  if(hasBatchAssignments()){
+    const currentBatch = getCurrentBatch();
+    const batches = {};
+    queue.forEach((p,i)=>{
+      if(!batches[p.batch]) batches[p.batch] = [];
+      batches[p.batch].push({p,i});
+    });
+    body.innerHTML = Object.entries(batches)
+      .sort(([a],[b])=>Number(a)-Number(b))
+      .map(([bn, entries])=>{
+        const batchNum = Number(bn);
+        const isCurrent = batchNum === currentBatch;
+        const allDone = entries.every(({p})=>{
+          const dis = p.disabledCombos || {};
+          const active = combos.filter(c=>!dis[c.id]);
+          return active.length===0 || active.every(c=>p.statuses[c.id]==='posted'||p.statuses[c.id]==='failed');
+        });
+        const divLabel = `Batch ${bn}${allDone ? ' ✓' : isCurrent ? ' — up next' : ''}`;
+        const divClass = `batch-divider${isCurrent?' current':''}${allDone?' done':''}`;
+        const divider = `<div class="${divClass}"><span class="batch-divider-label">${divLabel}</span></div>`;
+        return divider + entries.map(({p,i})=>renderQueueItem(p,i)).join('');
+      }).join('');
+  } else {
+    body.innerHTML = queue.map((p,i)=>renderQueueItem(p,i)).join('');
+  }
 
   progressFooter.style.display = 'block';
   updateProgressBar();
@@ -1183,6 +1318,7 @@ function clearDone(){
     const active = combos.filter(c=>!dis[c.id]);
     return !(active.length===0 || active.every(c=>p.statuses[c.id]==='posted'));
   });
+  queue.forEach(p=>p.batch=null);
   saveQueue(); renderQueue(); updateLaunchBtn();
 }
 
@@ -1255,26 +1391,30 @@ function updateLaunchBtn(){
 
   btn.disabled = false;
 
-  const sessionItems = getNextSessionItems();
-  const sessionCombos = sessionItems.reduce((s,p)=>{
+  if(!hasBatchAssignments()){
+    btn.innerHTML = '&#10022; Split &amp; Generate';
+    return;
+  }
+
+  const currentBatch = getCurrentBatch();
+  if(currentBatch == null){
+    btn.disabled = true;
+    btn.innerHTML = '&#10022; All batches complete';
+    return;
+  }
+
+  const totalBatches = getTotalBatches();
+  const batchItems = getCurrentBatchItems();
+  const batchPending = batchItems.reduce((s,p)=>{
     const dis = p.disabledCombos || {};
-    return s + combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
-  }, 0);
+    return s + combos.filter(c=>!dis[c.id] && isPendingStatus(p.statuses[c.id])).length;
+  },0);
+  const batchesAfter = totalBatches - currentBatch;
+  const afterLabel = batchesAfter > 0
+    ? `${batchesAfter} batch${batchesAfter!==1?'es':''} after`
+    : 'last batch';
 
-  const totalPendingCombos = pendingItems.reduce((s,p)=>{
-    const dis = p.disabledCombos || {};
-    return s + combos.filter(c=>!dis[c.id]&&(!p.statuses[c.id]||p.statuses[c.id]==='pending'||p.statuses[c.id]==='failed')).length;
-  }, 0);
-
-  const remainingCombos = totalPendingCombos - sessionCombos;
-  const sessionsAfter = remainingCombos > 0 ? Math.ceil(remainingCombos / pacing.sessionSize) : 0;
-  const anyPosted = queue.some(p=>combos.some(c=>p.statuses[c.id]==='posted'));
-  const verb = anyPosted ? 'Continue' : 'Start';
-  const afterLabel = sessionsAfter > 0
-    ? `${sessionsAfter} session${sessionsAfter!==1?'s':''} after`
-    : 'last session';
-
-  btn.innerHTML = `&#10022; ${verb} session &nbsp;<span style="font-weight:400;font-size:13px;opacity:.85">${sessionCombos} post${sessionCombos!==1?'s':''} &middot; ${afterLabel}</span>`;
+  btn.innerHTML = `&#10022; Generate batch ${currentBatch} &nbsp;<span style="font-weight:400;font-size:13px;opacity:.85">${batchPending} post${batchPending!==1?'s':''} &middot; ${afterLabel}</span>`;
 }
 
 function toggleCombo(productId, comboId){
@@ -1327,7 +1467,8 @@ function buildPrompt(items){
   if(!items || items.length===0) return null;
   const comboList = combos.map((c,i)=>`  ${i+1}. Account: "${c.accountName.trim()}" → Group: "${(c.groupName||'(see URL)').trim()}" (URL: ${c.groupUrl.trim()})`).join('\n');
   const productList = items.map((p,i)=>`  Product ${i+1} [ID: ${p.id}]: ${p.url}`).join('\n');
-  const totalPosts = items.reduce((sum,p)=>{ const dis=p.disabledCombos||{}; return sum+combos.filter(c=>!dis[c.id]).length; },0);
+  const isPending = (p, c) => isPendingStatus(p.statuses[c.id]);
+  const totalPosts = items.reduce((sum,p)=>{ const dis=p.disabledCombos||{}; return sum+combos.filter(c=>!dis[c.id]&&isPending(p,c)).length; },0);
 
   // Blurb guidance section
   const blurbSection = blurbs.length > 0
@@ -1350,7 +1491,7 @@ For every Facebook post, write a fresh 4–6 word opening blurb on the first lin
 
   const perProductSteps = items.map((p,i)=>{
     const disabled = p.disabledCombos || {};
-    const activeCombos = combos.filter(c=>!disabled[c.id]);
+    const activeCombos = combos.filter(c=>!disabled[c.id]&&isPending(p,c));
     if(activeCombos.length===0) return `\n---\nPRODUCT ${i+1} [ID: ${p.id}]\nURL: ${p.url}\n  (all combos skipped for this product)\n---`;
 
     const templateGroups = {};
@@ -1559,7 +1700,7 @@ IF ANYTHING GOES WRONG
 - Group not found or access denied → mark combo as failed, continue
 - Any other error → mark the specific combo as failed, continue with the next one
 
-Say "Session complete ✓ Posted ${totalPosts} post${totalPosts!==1?'s':''} across ${items.length} product${items.length!==1?'s':''} and ${combos.length} account${combos.length!==1?'s':''}. ${hasMoreSessions ? `Come back in about ${sessionGap} minutes to start the next session — the dashboard will be ready.` : `That\'s the full queue — all done for today!'`}" when fully finished.`;
+Say "Session complete ✓ Posted ${totalPosts} post${totalPosts!==1?'s':''} across ${items.length} product${items.length!==1?'s':''} and ${combos.length} account${combos.length!==1?'s':''}. ${hasMoreSessions ? `Come back in about ${sessionGap} minutes to start the next session — the dashboard will be ready.` : `That\'s the full queue — all done for today!`}" when fully finished.`;
 }
 
 // ── Launch ──
@@ -1569,7 +1710,10 @@ async function launch(){
     toast(`⚠️ ${invalid.length} combo(s) missing required fields — check Settings`);
     return;
   }
-  const items = getNextSessionItems();
+  // Auto-split if not yet done
+  if(!hasBatchAssignments()) splitIntoBatches();
+
+  const items = getCurrentBatchItems();
   if(!items.length){ toast('Nothing left to post!'); return; }
   const prompt = buildPrompt(items);
   if(!prompt){ toast('Nothing left to post!'); return; }
