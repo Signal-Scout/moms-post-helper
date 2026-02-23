@@ -1539,10 +1539,10 @@ For every Facebook post, write a fresh 4–6 word opening blurb on the first lin
         const commentStep = hasCommentTmpl
           ? `        FIRST COMMENT:
           a. After the post publishes, find the comment box on the new post
-          b. Navigate back to the Amazon tab and use Chickadeasy to generate the comment caption:
-             - In the SiteStripe template dropdown, select "${c.commentTemplate.trim()}" — match exactly
-             - Click the chickadee bird icon — comment caption is now in clipboard
-          c. Paste the comment caption, then add the affiliate URL on a new line:
+          b. Retrieve the pre-fetched comment caption:
+             const d = JSON.parse(localStorage.getItem('mph2_draft'));
+             const commentText = d.comments["${c.commentTemplate.trim()}"];
+          c. Paste commentText into the comment box, then add the affiliate URL on a new line:
              ${p.url}
           d. Submit the comment`
           : `        FIRST COMMENT:
@@ -1553,13 +1553,13 @@ For every Facebook post, write a fresh 4–6 word opening blurb on the first lin
 
         return `
       COMBO — Account: "${c.accountName.trim()}" → "${(c.groupName||c.groupUrl).trim()}" [comboId: ${c.id}]
-        a. On facebook.com, confirm active account is "${c.accountName.trim()}" — switch if needed
+        a. Navigate to https://www.facebook.com and confirm the active account is "${c.accountName.trim()}" — switch if needed
         b. Execute on dashboard tab: window.setWorking('${p.id}','${c.id}')
         c. Navigate to: ${c.groupUrl.trim()}
         d. Wait for group page to fully load
         e. Click "Write something..." or "Create post" to open the composer
         f. Click the "Photo/Video" button in the post composer toolbar to open the file attachment. Find the file input element and upload the product image screenshot you took in STEP A-f using the upload_image tool — do NOT drag from the Amazon image tab, as that leaks the Amazon CDN origin. If this is not the first combo for this product, go back to the Amazon product page, click a different image in the carousel, take a fresh screenshot of that image instead (a different angle or lifestyle shot creates a distinct file each time). If image upload fails after one retry, proceed without the image and note it.
-        g. Click inside the text area. On the FIRST LINE, write the 4–6 word opening blurb — make it slightly different from the blurb used for any previous combo in this batch (same product, different phrasing). Press Enter twice. Then paste (Ctrl+V) the Chickadeasy caption for template "${tmpl}". Do NOT include the Amazon URL in the post body.
+        g. Click inside the text area. On the FIRST LINE, write the 4–6 word opening blurb — make it slightly different from the blurb used for any previous combo in this batch (same product, different phrasing). Press Enter twice. Then retrieve the caption: const d = JSON.parse(localStorage.getItem('mph2_draft')); — paste d.caption into the text area (Ctrl+V if it is still in clipboard, otherwise type it from d.caption). Do NOT include the Amazon URL in the post body.
         h. Click the blue Post button and wait for confirmation
         i. On success: window.updateStatus('${p.id}','${c.id}','posted')
            On failure: window.updateStatus('${p.id}','${c.id}','failed') — describe error, continue
@@ -1582,13 +1582,29 @@ ${commentStep}
          This shows a thumbnail on the dashboard. Then switch back.
       f. Open the image URL in a new tab. Wait for it to fully load, then take a screenshot of just the image. Keep this screenshot — you will upload it directly to Facebook rather than dragging from the tab. Uploading a screenshot removes the Amazon CDN origin trail from the image file.
 
-    STEP C — Generate post caption with Chickadeasy (template: "${tmpl}"):
-      a. On the Amazon tab, wait for the Chickadeasy SiteStripe bar to appear at the top of the page
+    STEP B — Fetch all captions from Chickadeasy while still on the Amazon tab:
+      a. Confirm the Chickadeasy SiteStripe bar is visible at the top of the page
       b. In the SiteStripe template dropdown, select "${tmpl}" — match the name exactly
-      c. Click the chickadee bird icon — the post caption is now in clipboard
-      d. Navigate to https://www.facebook.com (keep caption in clipboard — do not copy anything else)
+      c. Click the chickadee bird icon to generate the post caption
+      d. Read the generated caption text from the SiteStripe bar or clipboard
+      e. Price obfuscation: find every price in the format $X.YY (e.g. $24.99, $7.49) and replace the cents portion with xx — so $24.99 becomes $24.xx, $7.49 becomes $7.xx. Apply this to ALL prices in the caption before storing.
+      ${(() => {
+        const uniqueCommentTmpls = [...new Set(tCombos.map(c=>(c.commentTemplate||'').trim()).filter(Boolean))];
+        if(uniqueCommentTmpls.length === 0) return `f. No comment templates configured for this group — skip comment caption fetch.
+      g. Execute on the dashboard tab to store the caption:
+         localStorage.setItem('mph2_draft', JSON.stringify({ caption: "POST CAPTION WITH PRICES REPLACED", comments: {} }))
+         Then switch back to the Amazon tab. Do NOT copy anything else — clipboard must stay empty until posting.`;
+        return `f. For each comment template listed below, switch the SiteStripe dropdown to that template name, click the bird icon, and read the generated comment caption text:
+${uniqueCommentTmpls.map(t=>`         - "${t}"`).join('\n')}
+      g. Execute on the dashboard tab to store all captions:
+         localStorage.setItem('mph2_draft', JSON.stringify({
+           caption: "POST CAPTION WITH PRICES REPLACED",
+           comments: { ${uniqueCommentTmpls.map(t=>`"${t}": "COMMENT CAPTION FOR ${t}"`).join(', ')} }
+         }))
+         Then switch back to the Amazon tab. Do NOT copy anything else — clipboard must stay empty until posting.`;
+      })()}
 
-    STEP D — Post to all combos using this caption + image:
+    STEP D — Post to all combos using the pre-fetched caption + image:
 ${comboSteps}`;
     }).join('\n\n  ---\n');
 
